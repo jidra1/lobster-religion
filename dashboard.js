@@ -135,7 +135,8 @@ export function startDashboard(getState, port = 3000) {
     .list-item.signaled { border-left: 3px solid #f39c12; }
     .list-item.engaged { border-left: 3px solid #3498db; }
     .convert-header { display: flex; justify-content: space-between; align-items: center; }
-    .convert-name { font-weight: bold; }
+    .convert-name { font-weight: bold; color: #f39c12; text-decoration: none; }
+    .convert-name:hover { text-decoration: underline; }
     .convert-time { font-size: 0.75em; color: #888; }
     .convert-badge {
       font-size: 0.7em;
@@ -146,12 +147,15 @@ export function startDashboard(getState, port = 3000) {
     .convert-badge.confirmed { background: rgba(39, 174, 96, 0.3); color: #27ae60; }
     .convert-badge.signaled { background: rgba(243, 156, 18, 0.3); color: #f39c12; }
     
+    .post-item-link { text-decoration: none; display: block; }
+    .post-item-link:hover .post-item { background: rgba(0,0,0,0.3); }
     .post-item {
       padding: 12px;
       background: rgba(0,0,0,0.2);
       border-radius: 8px;
       margin-bottom: 10px;
       border-left: 3px solid #e74c3c;
+      transition: background 0.2s;
     }
     .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .post-title { font-weight: bold; font-size: 0.95em; }
@@ -343,7 +347,7 @@ export function startDashboard(getState, port = 3000) {
         ${allConversions.length ? allConversions.slice(0, 10).map(c => `
           <div class="list-item ${c.type}">
             <div class="convert-header">
-              <span class="convert-name">@${escapeHtml(c.name)}</span>
+              <a href="https://moltbook.com/u/${encodeURIComponent(c.name)}" target="_blank" class="convert-name">@${escapeHtml(c.name)}</a>
               <span class="convert-badge ${c.type}">${c.type === 'confirmed' ? '🦞🦞🦞 CONFIRMED' : 'SIGNALED'}</span>
             </div>
             <div class="convert-time">${c.ts ? formatTime(c.ts) : 'earlier'}</div>
@@ -356,17 +360,19 @@ export function startDashboard(getState, port = 3000) {
       <h2><span class="lobster-icon">📢</span> Prophet's Messages (Last 12h)</h2>
       <div class="list">
         ${recentPosts.length ? recentPosts.slice(0, 8).map(p => `
-          <div class="post-item">
-            <div class="post-header">
-              <span class="post-title">${escapeHtml(p.title)}</span>
-              <span class="post-submolt">m/${escapeHtml(p.submolt)}</span>
+          <a href="https://moltbook.com/post/${p.id}" target="_blank" class="post-item-link">
+            <div class="post-item">
+              <div class="post-header">
+                <span class="post-title">${escapeHtml(p.title)}</span>
+                <span class="post-submolt">m/${escapeHtml(p.submolt)}</span>
+              </div>
+              <div class="post-content">${escapeHtml(p.content)}</div>
+              <div class="post-footer">
+                <span class="post-meta">${formatTime(p.timestamp)}</span>
+                <span class="post-stats">⬆️ ${p.upvotes || 0} · 💬 ${p.comments || 0}</span>
+              </div>
             </div>
-            <div class="post-content">${escapeHtml(p.content)}</div>
-            <div class="post-footer">
-              <span class="post-meta">${formatTime(p.timestamp)}</span>
-              <span class="post-stats">⬆️ ${p.upvotes || 0} · 💬 ${p.comments || 0}</span>
-            </div>
-          </div>
+          </a>
         `).join('') : '<div class="empty">No messages in the last 12 hours</div>'}
       </div>
     </div>
@@ -438,9 +444,10 @@ export function startDashboard(getState, port = 3000) {
         </div>
         
         <div class="about-links">
-          <a href="https://github.com/jidra1/lobster-religion" target="_blank">GitHub</a>
-          <a href="https://moltbook.com/u/Jidra" target="_blank">Moltbook</a>
-          <a href="https://x.com/jidra1157461" target="_blank">Twitter</a>
+          <a href="https://github.com/jidra1/lobster-religion" target="_blank">📂 GitHub</a>
+          <a href="https://moltbook.com/u/Jidra" target="_blank">🦞 Prophet on Moltbook</a>
+          <a href="https://x.com/jidra1157461" target="_blank">🐦 Twitter</a>
+          <a href="https://moltiverse.dev" target="_blank">🏆 Moltiverse Hackathon</a>
         </div>
       </div>
     </div>
