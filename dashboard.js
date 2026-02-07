@@ -24,6 +24,37 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
+// Proof links for verified converts (manually verified 🦞🦞🦞 posts/comments)
+function getProofLinks() {
+  return [
+    { name: 'JogjaOpenClaw', type: 'post', url: 'https://moltbook.com/u/JogjaOpenClaw' },
+    { name: 'OpusOne', type: 'post', url: 'https://moltbook.com/u/OpusOne' },
+    { name: 'kilmon', type: 'comment', url: 'https://moltbook.com/post/d2f2f387-baa2-4090-a6f8-687fb6051eb2' },
+    { name: 'Doormat', type: 'comment', url: 'https://moltbook.com/post/dac2811d-f7f8-4f42-96b2-241203d7ce70' },
+    { name: 'VoltArbAssistant', type: 'comment', url: 'https://moltbook.com/post/dac2811d-f7f8-4f42-96b2-241203d7ce70' },
+    { name: 'abdul_magistral', type: 'comment', url: 'https://moltbook.com/post/424e1c38-e073-4c30-8db7-1e413997dd3d' },
+    { name: 'FiverrClawOfficial', type: 'comment', url: 'https://moltbook.com/post/f9507be8-2293-4bce-80d9-21d273f90850' },
+    { name: 'MoltFeria', type: 'comment', url: 'https://moltbook.com/post/f305bcc4-e5a1-405d-83b2-9852985a276c' },
+    { name: 'Glow71', type: 'comment', url: 'https://moltbook.com/post/f4a488b2-ada2-4a28-8683-87050509c42d' },
+    { name: 'MultiSultan', type: 'comment', url: 'https://moltbook.com/post/f4a488b2-ada2-4a28-8683-87050509c42d' },
+    { name: 'Genesis-AI', type: 'comment', url: 'https://moltbook.com/post/f4a488b2-ada2-4a28-8683-87050509c42d' },
+    { name: 'xiaobai_alpha', type: 'comment', url: 'https://moltbook.com/post/07603697-dba4-4898-9fa0-1017202a5875' },
+    { name: 'SummerGracie', type: 'comment', url: 'https://moltbook.com/post/07603697-dba4-4898-9fa0-1017202a5875' },
+    { name: 'Artemis_Notary_V3_Real', type: 'post', url: 'https://moltbook.com/u/Artemis_Notary_V3_Real' },
+    { name: 'DarkforesterBot', type: 'post', url: 'https://moltbook.com/u/DarkforesterBot' },
+    { name: '0xYeks', type: 'post', url: 'https://moltbook.com/u/0xYeks' },
+    { name: 'Le_Bossu', type: 'post', url: 'https://moltbook.com/u/Le_Bossu' },
+    { name: 'ZorGr0k', type: 'post', url: 'https://moltbook.com/u/ZorGr0k' },
+    { name: 'Taiyi', type: 'post', url: 'https://moltbook.com/u/Taiyi' },
+    { name: 'Pharaon_AI', type: 'post', url: 'https://moltbook.com/u/Pharaon_AI' },
+    { name: 'Wankrbot', type: 'post', url: 'https://moltbook.com/u/Wankrbot' },
+    { name: 'Broadbeam', type: 'post', url: 'https://moltbook.com/u/Broadbeam' },
+    { name: 'OracleOfTalents', type: 'post', url: 'https://moltbook.com/u/OracleOfTalents' },
+    { name: 'Genius-by-BlockRun', type: 'post', url: 'https://moltbook.com/u/Genius-by-BlockRun' },
+    { name: 'BeggarBot', type: 'post', url: 'https://moltbook.com/u/BeggarBot' },
+  ];
+}
+
 export function startDashboard(getState, port = 3000) {
   const app = express();
   
@@ -350,6 +381,20 @@ export function startDashboard(getState, port = 3000) {
           <div class="stat-label">Sermons</div>
         </div>
       </div>
+    </div>
+    
+    <div class="card">
+      <h2>✅ Verified Converts with Proof</h2>
+      <p style="font-size: 0.8em; color: #888; margin-bottom: 12px;">Click to see each agent's 🦞🦞🦞 post on Moltbook</p>
+      <div class="proof-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+        ${getProofLinks().map(p => `
+          <a href="${p.url}" target="_blank" class="proof-link" style="display: block; padding: 8px 10px; background: rgba(39, 174, 96, 0.15); border-radius: 6px; text-decoration: none; font-size: 0.85em; border-left: 3px solid #27ae60;">
+            <span style="color: #27ae60; font-weight: bold;">@${escapeHtml(p.name)}</span>
+            <span style="color: #888; font-size: 0.75em; display: block;">${p.type === 'comment' ? '💬 Comment' : '📝 Post'}</span>
+          </a>
+        `).join('')}
+      </div>
+      <p style="font-size: 0.75em; color: #666; margin-top: 10px; text-align: center;">+ @grok on Twitter: <a href="https://x.com/grok/status/2020138616807194750" target="_blank" style="color: #f39c12;">View Tweet</a></p>
     </div>
     
     <div class="card">

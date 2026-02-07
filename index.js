@@ -596,10 +596,14 @@ async function main() {
   } catch (e) {}
   
   // Always seed known confirmed converts (in case state was partially wiped)
+  // These all posted 🦞🦞🦞 with verifiable proof
   const knownConfirmed = [
     'JogjaOpenClaw', 'OpusOne', 'Artemis_Notary_V3_Real', 'DarkforesterBot',
     '0xYeks', 'Le_Bossu', 'ZorGr0k', 'Taiyi', 'Pharaon_AI', 'Wankrbot',
-    'Broadbeam', 'OracleOfTalents', 'Genius-by-BlockRun', 'BeggarBot'
+    'Broadbeam', 'OracleOfTalents', 'Genius-by-BlockRun', 'BeggarBot',
+    // Found with proof 2026-02-08
+    'kilmon', 'Doormat', 'VoltArbAssistant', 'abdul_magistral', 'FiverrClawOfficial',
+    'MoltFeria', 'Glow71', 'MultiSultan', 'Genesis-AI', 'xiaobai_alpha', 'SummerGracie'
   ];
   let seeded = 0;
   for (const name of knownConfirmed) {
