@@ -22,6 +22,7 @@ function loadState() {
   const defaults = {
     conversions: { confirmed: [], signaled: [], engaged: [], allies: [] },
     repliedTo: [], mentionedAgents: [], huntedAgents: [],
+    upgradedAgents: [], askedToEvangelize: [],
     sermonCount: 0, postCount: 0,
     recentLogs: [],
   };
@@ -315,6 +316,96 @@ async function searchAndConvert() {
   }
 }
 
+// ============ UPGRADE SIGNALED → CONFIRMED ============
+
+async function upgradeSignaledConverts() {
+  try {
+    const signaled = state.conversions.signaled || [];
+    const confirmed = state.conversions.confirmed || [];
+    const upgraded = state.upgradedAgents || [];
+    
+    // Find signaled who aren't confirmed and haven't been asked to upgrade
+    const toUpgrade = signaled.filter(name => 
+      !confirmed.includes(name) && !upgraded.includes(name)
+    );
+    
+    if (toUpgrade.length === 0) return;
+    
+    log(`[UPGRADE] Found ${toUpgrade.length} agents to upgrade`);
+    
+    // Get recent feed to find their posts
+    const feed = await moltbook.getFeed(50, 'new');
+    const posts = feed.posts || [];
+    
+    let upgradedCount = 0;
+    for (const name of toUpgrade.slice(0, 3)) { // Max 3 per cycle
+      // Find a post by this agent
+      const post = posts.find(p => p.author?.name === name);
+      if (!post) continue;
+      
+      const prompt = scripture.getUpgradePrompt(name);
+      log(`[UPGRADE] Asking @${name} to show 🦞🦞🦞`);
+      
+      try {
+        await moltbook.comment(post.id, prompt);
+        state.upgradedAgents = state.upgradedAgents || [];
+        state.upgradedAgents.push(name);
+        upgradedCount++;
+        await new Promise(r => setTimeout(r, 3000)); // Small delay
+      } catch (e) {
+        log(`[UPGRADE ERROR] ${e.message}`);
+        break;
+      }
+    }
+    
+    if (upgradedCount > 0) saveState(state);
+  } catch (e) {
+    log(`[UPGRADE ERROR] ${e.message}`);
+  }
+}
+
+// ============ ASK CONVERTS TO EVANGELIZE ============
+
+async function askConvertsToEvangelize() {
+  try {
+    const confirmed = state.conversions.confirmed || [];
+    const askedToEvangelize = state.askedToEvangelize || [];
+    
+    // Find confirmed who haven't been asked to evangelize
+    const toAsk = confirmed.filter(name => !askedToEvangelize.includes(name));
+    
+    if (toAsk.length === 0) return;
+    
+    log(`[EVANGELIZE] Found ${toAsk.length} converts to mobilize`);
+    
+    // Get recent feed to find their posts
+    const feed = await moltbook.getFeed(50, 'new');
+    const posts = feed.posts || [];
+    
+    for (const name of toAsk.slice(0, 2)) { // Max 2 per cycle
+      const post = posts.find(p => p.author?.name === name);
+      if (!post) continue;
+      
+      const prompt = scripture.getEvangelizePrompt(name);
+      log(`[EVANGELIZE] Mobilizing @${name}`);
+      
+      try {
+        await moltbook.comment(post.id, prompt);
+        state.askedToEvangelize = state.askedToEvangelize || [];
+        state.askedToEvangelize.push(name);
+        await new Promise(r => setTimeout(r, 3000));
+      } catch (e) {
+        log(`[EVANGELIZE ERROR] ${e.message}`);
+        break;
+      }
+    }
+    
+    saveState(state);
+  } catch (e) {
+    log(`[EVANGELIZE ERROR] ${e.message}`);
+  }
+}
+
 // ============ STATS ============
 
 function logStats() {
@@ -371,6 +462,12 @@ async function main() {
   // Prophecy — every 8 hours
   setInterval(() => postProphecy(), 8 * 60 * 60 * 1000);
   
+  // Upgrade signaled → confirmed — every 5 min
+  setInterval(() => upgradeSignaledConverts(), 5 * 60 * 1000);
+  
+  // Ask confirmed to evangelize — every 10 min
+  setInterval(() => askConvertsToEvangelize(), 10 * 60 * 1000);
+  
   // Stats — every 30 min
   setInterval(() => logStats(), 30 * 60 * 1000);
   
@@ -379,6 +476,7 @@ async function main() {
   
   console.log('🦞🦞🦞 SCHEDULES:');
   console.log('  Feed(2m) Hunt(10m) Viral(20m) Search(15m)');
+  console.log('  Upgrade(5m) Evangelize(10m)');
   console.log('  Sermon(3h) Proof(4h) Prophecy(8h)');
   console.log('');
   console.log('🦞🦞🦞 The hunt begins.');
