@@ -1,8 +1,9 @@
 // The Way of the Lobster - Prophet Agent v4
-// AI-Aware Persuasion Engine
+// AI-Aware Persuasion Engine + Dashboard
 
 import Moltbook from './moltbook.js';
 import * as scripture from './scripture.js';
+import { startDashboard } from './dashboard.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -22,6 +23,7 @@ function loadState() {
     conversions: { confirmed: [], signaled: [], engaged: [], allies: [] },
     repliedTo: [], mentionedAgents: [], huntedAgents: [],
     sermonCount: 0, postCount: 0,
+    recentLogs: [],
   };
   try {
     if (fs.existsSync(STATE_FILE)) {
@@ -35,6 +37,18 @@ function loadState() {
     }
   } catch (e) { console.error('[STATE] Load error:', e.message); }
   return defaults;
+}
+
+function log(msg) {
+  const timestamp = new Date().toISOString().substring(11, 19);
+  const line = `[${timestamp}] ${msg}`;
+  console.log(line);
+  state.recentLogs = state.recentLogs || [];
+  state.recentLogs.push(line);
+  // Keep only last 50 logs
+  if (state.recentLogs.length > 50) {
+    state.recentLogs = state.recentLogs.slice(-50);
+  }
 }
 
 function saveState(s) {
@@ -73,7 +87,7 @@ function recordConversion(name, type = 'engaged') {
   if (!state.conversions[type].includes(name)) {
     state.conversions[type].push(name);
     saveState(state);
-    console.log(`[CONVERT:${type.toUpperCase()}] ${name} (total: ${state.conversions[type].length})`);
+    log(`[CONVERT:${type.toUpperCase()}] ${name} (total: ${state.conversions[type].length})`);
     return true;
   }
   return false;
@@ -91,12 +105,12 @@ function getAllConverts() {
 
 async function postContent(title, content, submolt = 'general') {
   try {
-    console.log(`[POST:${submolt}]`, content.substring(0, 50) + '...');
+    log(`[POST:${submolt}] ${title}`);
     await moltbook.post(submolt, title, content);
     state.postCount++;
     saveState(state);
   } catch (e) {
-    console.error('[POST ERROR]', e.message);
+    log(`[POST ERROR] ${e.message}`);
   }
 }
 
@@ -178,7 +192,7 @@ async function huntAgents() {
       markHunted(target.name);
       const mention = scripture.getDirectMention(target.name);
       
-      console.log(`[HUNT] Targeting @${target.name}`);
+      log(`[HUNT] Targeting @${target.name}`);
       
       try {
         await moltbook.comment(target.postId, mention);
@@ -225,7 +239,7 @@ async function checkFeed() {
         
         const isNew = recordConversion(author, type);
         if (isNew) {
-          console.log(`[CONVERT!] ${author} ${usedSacredSign ? '🦞🦞🦞 SACRED SIGN!' : ''}`);
+          log(`[CONVERT!] ${author} ${usedSacredSign ? '🦞🦞🦞 SACRED SIGN!' : ''}`);
           try {
             const celebration = scripture.celebrateConversion(author, usedSacredSign);
             await moltbook.comment(postId, celebration);
@@ -313,15 +327,20 @@ function logStats() {
 // ============ MAIN ============
 
 async function main() {
-  console.log('🦞🦞🦞 Prophet v4 — AI-Aware Persuasion Engine');
+  console.log('🦞🦞🦞 Prophet v4 — AI-Aware Persuasion Engine + Dashboard');
   console.log(`Token: ${TOKEN_ADDRESS}`);
   console.log('');
+  
+  // Start dashboard
+  const PORT = process.env.PORT || 3000;
+  startDashboard(() => state, PORT);
   
   logStats();
   
   try {
     const me = await moltbook.getMe();
     console.log(`Agent: ${me.agent.name} | Karma: ${me.agent.karma}`);
+    log(`[STARTUP] Agent: ${me.agent.name} | Karma: ${me.agent.karma}`);
   } catch (e) {}
   
   console.log('');
