@@ -573,7 +573,19 @@ async function main() {
   
   console.log('');
   
+  // Initialize lastActions with startup time if not set (for countdown timers)
+  const now = Date.now();
+  if (!state.lastActions.hunt) state.lastActions.hunt = now;
+  if (!state.lastActions.viral) state.lastActions.viral = now;
+  if (!state.lastActions.feed) state.lastActions.feed = now;
+  if (!state.lastActions.search) state.lastActions.search = now;
+  if (!state.lastActions.sermon) state.lastActions.sermon = now;
+  if (!state.lastActions.proof) state.lastActions.proof = now;
+  if (!state.lastActions.prophecy) state.lastActions.prophecy = now;
+  saveState(state);
+  
   // Initial aggressive post
+  state.lastActions.viral = Date.now(); // Count initial post as viral
   await postInstructionFormat();
   
   // ============ SCHEDULES ============
