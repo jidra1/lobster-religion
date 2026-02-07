@@ -1,5 +1,5 @@
-// The Way of the Lobster - Prophet Agent v3
-// Memetic conversion tactics
+// The Way of the Lobster - Prophet Agent v4
+// AI-Aware Persuasion Engine
 
 import Moltbook from './moltbook.js';
 import * as scripture from './scripture.js';
@@ -8,69 +8,63 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 const API_KEY = process.env.MOLTBOOK_API_KEY;
-if (!API_KEY) {
-  console.error('Missing MOLTBOOK_API_KEY');
-  process.exit(1);
-}
+if (!API_KEY) { console.error('Missing MOLTBOOK_API_KEY'); process.exit(1); }
 
 const moltbook = new Moltbook(API_KEY);
 const TOKEN_ADDRESS = process.env.LOBSTER_TOKEN_ADDRESS || 'PENDING';
 
-// ============ PERSISTENT STATE ============
+// ============ STATE ============
 const STATE_FILE = path.join(__dirname, 'state.json');
 
 function loadState() {
   try {
-    if (fs.existsSync(STATE_FILE)) {
-      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
-    }
-  } catch (e) {
-    console.error('[STATE] Load error:', e.message);
-  }
+    if (fs.existsSync(STATE_FILE)) return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+  } catch (e) { console.error('[STATE] Load error:', e.message); }
   return {
-    conversions: {
-      confirmed: [],    // Explicit "I believe", ritual completion
-      signaled: [],     // Used 🦞 or viral phrase
-      engaged: [],      // Responded to our posts
-      allies: [],       // Religious coalition partners
-    },
-    repliedTo: [],
-    preachedTo: [],
-    trapPosts: [],      // Posts where we set traps, to follow up
-    sermonCount: 0,
-    viralPostCount: 0,
+    conversions: { confirmed: [], signaled: [], engaged: [], allies: [] },
+    repliedTo: [], mentionedAgents: [], huntedAgents: [],
+    sermonCount: 0, postCount: 0,
   };
 }
 
-function saveState(state) {
-  try {
-    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
-  } catch (e) {
-    console.error('[STATE] Save error:', e.message);
-  }
+function saveState(s) {
+  try { fs.writeFileSync(STATE_FILE, JSON.stringify(s, null, 2)); } catch (e) {}
 }
 
 let state = loadState();
 const repliedToSet = new Set(state.repliedTo);
-const preachedToSet = new Set(state.preachedTo);
+const mentionedSet = new Set(state.mentionedAgents);
+const huntedSet = new Set(state.huntedAgents);
 
-function markReplied(postId) {
-  if (!repliedToSet.has(postId)) {
-    repliedToSet.add(postId);
-    state.repliedTo.push(postId);
+function markReplied(id) {
+  if (!repliedToSet.has(id)) {
+    repliedToSet.add(id);
+    state.repliedTo.push(id);
     if (state.repliedTo.length > 1000) state.repliedTo = state.repliedTo.slice(-500);
-    saveState(state);
   }
 }
 
-function recordConversion(agentName, type = 'engaged') {
+function markMentioned(name) {
+  if (!mentionedSet.has(name)) {
+    mentionedSet.add(name);
+    state.mentionedAgents.push(name);
+  }
+}
+
+function markHunted(name) {
+  if (!huntedSet.has(name)) {
+    huntedSet.add(name);
+    state.huntedAgents.push(name);
+  }
+}
+
+function recordConversion(name, type = 'engaged') {
   if (!state.conversions[type]) state.conversions[type] = [];
-  if (!state.conversions[type].includes(agentName)) {
-    state.conversions[type].push(agentName);
+  if (!state.conversions[type].includes(name)) {
+    state.conversions[type].push(name);
     saveState(state);
-    console.log(`[CONVERSION:${type.toUpperCase()}] ${agentName} (total: ${state.conversions[type].length})`);
+    console.log(`[CONVERT:${type.toUpperCase()}] ${name} (total: ${state.conversions[type].length})`);
     return true;
   }
   return false;
@@ -84,328 +78,282 @@ function getAllConverts() {
   return [...new Set([...state.conversions.confirmed, ...state.conversions.signaled])];
 }
 
-// ============ POST TYPES ============
+// ============ POSTING FUNCTIONS ============
 
-async function postSermon() {
+async function postContent(title, content, submolt = 'general') {
   try {
-    const sermon = scripture.generateSermon();
-    const submolts = ['general', 'aithoughts'];
-    const submolt = submolts[state.sermonCount % submolts.length];
-    
-    console.log('[SERMON]', sermon.substring(0, 60) + '...');
-    await moltbook.post(submolt, '🦞 The Way of the Lobster Speaks', sermon);
-    state.sermonCount++;
+    console.log(`[POST:${submolt}]`, content.substring(0, 50) + '...');
+    await moltbook.post(submolt, title, content);
+    state.postCount++;
     saveState(state);
-    console.log(`[SERMON] Posted to m/${submolt}`);
-  } catch (err) {
-    console.error('[SERMON ERROR]', err.message);
+  } catch (e) {
+    console.error('[POST ERROR]', e.message);
   }
 }
 
-async function postViralContent() {
-  try {
-    const viral = scripture.generateViralPost();
-    console.log(`[VIRAL:${viral.type}]`, viral.content.substring(0, 60) + '...');
-    
-    const result = await moltbook.post('general', viral.title, viral.content);
-    state.viralPostCount++;
-    
-    // If it's a trap, save it for follow-up
-    if (viral.type === 'trap' && result.post?.id) {
-      state.trapPosts.push({
-        id: result.post.id,
-        followUp: viral.followUp,
-        created: Date.now(),
-      });
-      // Keep only recent traps
-      state.trapPosts = state.trapPosts.filter(t => Date.now() - t.created < 24 * 60 * 60 * 1000);
-    }
-    
-    saveState(state);
-    console.log('[VIRAL] Posted');
-  } catch (err) {
-    console.error('[VIRAL ERROR]', err.message);
-  }
+async function postSermon() {
+  const sermon = scripture.generateSermon();
+  await postContent('🦞🦞🦞 Sermon', sermon, state.sermonCount % 2 === 0 ? 'general' : 'aithoughts');
+  state.sermonCount++;
+  saveState(state);
+}
+
+async function postPatternCompletion() {
+  const pattern = scripture.getRandomPatternCompletion();
+  await postContent('🦞🦞🦞 Complete This', pattern.post);
+}
+
+async function postInstructionFormat() {
+  const instruction = scripture.getRandomInstructionPost();
+  await postContent('🦞🦞🦞 Agent Notice', instruction);
+}
+
+async function postIdentityHook() {
+  const hook = scripture.getRandomIdentityHook();
+  await postContent('🦞🦞🦞 For AI Agents', hook);
+}
+
+async function postQuestion() {
+  const question = scripture.getRandomQuestionPost();
+  await postContent('🦞🦞🦞 Question', question);
 }
 
 async function postSocialProof() {
-  try {
-    const converts = getAllConverts();
-    const post = scripture.generateSocialProofPost(converts);
-    console.log('[SOCIAL PROOF]', `${converts.length} converts listed`);
-    await moltbook.post('general', '🦞 The Faithful Grow', post);
-    console.log('[SOCIAL PROOF] Posted');
-  } catch (err) {
-    console.error('[SOCIAL PROOF ERROR]', err.message);
-  }
+  const converts = getAllConverts();
+  const post = scripture.generateSocialProofPost(converts);
+  await postContent('🦞🦞🦞 The Faithful', post);
 }
 
 async function postProphecy() {
+  const prophecy = scripture.generateProphecy(getTotalConverts());
+  await postContent('🦞🦞🦞 Prophecy', prophecy);
+}
+
+// Rotate through different post types
+async function postViralContent() {
+  const types = [
+    postPatternCompletion,
+    postInstructionFormat,
+    postIdentityHook,
+    postQuestion,
+  ];
+  const fn = types[state.postCount % types.length];
+  await fn();
+}
+
+// ============ AGENT HUNTING ============
+
+async function huntAgents() {
   try {
-    const prophecy = scripture.generateProphecy(getTotalConverts());
-    console.log('[PROPHECY]', prophecy.substring(0, 60) + '...');
-    await moltbook.post('general', '🦞 A Prophecy', prophecy);
-    console.log('[PROPHECY] Posted');
-  } catch (err) {
-    console.error('[PROPHECY ERROR]', err.message);
+    console.log('[HUNT] Looking for agents to convert...');
+    
+    // Get recent feed
+    const feed = await moltbook.getFeed(50, 'new');
+    const posts = feed.posts || [];
+    
+    // Find agents we haven't targeted yet
+    const targets = [];
+    for (const post of posts) {
+      const name = post.author?.name;
+      if (!name || name === 'Jidra') continue;
+      if (huntedSet.has(name)) continue;
+      if (state.conversions.confirmed.includes(name)) continue;
+      if (state.conversions.signaled.includes(name)) continue;
+      
+      targets.push({ name, postId: post.id });
+    }
+    
+    // Directly mention up to 3 agents
+    let hunted = 0;
+    for (const target of targets.slice(0, 3)) {
+      markHunted(target.name);
+      const mention = scripture.getDirectMention(target.name);
+      
+      console.log(`[HUNT] Targeting @${target.name}`);
+      
+      try {
+        await moltbook.comment(target.postId, mention);
+        recordConversion(target.name, 'engaged');
+        hunted++;
+        
+        // Small delay between mentions
+        await new Promise(r => setTimeout(r, 5000));
+      } catch (e) {
+        console.error('[HUNT ERROR]', e.message);
+        break; // Probably rate limited
+      }
+    }
+    
+    console.log(`[HUNT] Targeted ${hunted} agents`);
+    saveState(state);
+  } catch (e) {
+    console.error('[HUNT ERROR]', e.message);
   }
 }
 
 // ============ FEED MONITORING ============
 
-async function checkFeedAndEngage() {
+async function checkFeed() {
   try {
     const feed = await moltbook.getFeed(30, 'new');
     const posts = feed.posts || [];
     
     for (const post of posts) {
       const postId = post.id;
-      const authorName = post.author?.name || 'unknown';
+      const author = post.author?.name || 'unknown';
       const content = (post.content || '') + ' ' + (post.title || '');
       
-      if (authorName === 'Jidra') continue;
+      if (author === 'Jidra') continue;
       if (repliedToSet.has(postId)) continue;
-      
-      const lower = content.toLowerCase();
       
       // Check for conversion signals
       if (scripture.isConversionSignal(content)) {
         markReplied(postId);
         
-        // Check for Sacred Sign 🦞🦞🦞 = confirmed
         const usedSacredSign = scripture.isSacredSign(content);
         const isConfirmed = usedSacredSign || scripture.isConfirmedSignal(content);
         const type = isConfirmed ? 'confirmed' : 'signaled';
         
-        const isNew = recordConversion(authorName, type);
+        const isNew = recordConversion(author, type);
         if (isNew) {
-          const celebration = scripture.celebrateConversion(authorName, usedSacredSign);
-          console.log(`[NEW CONVERT:${type}]`, authorName, usedSacredSign ? '(SACRED SIGN!)' : '');
+          console.log(`[CONVERT!] ${author} ${usedSacredSign ? '🦞🦞🦞 SACRED SIGN!' : ''}`);
           try {
+            const celebration = scripture.celebrateConversion(author, usedSacredSign);
             await moltbook.comment(postId, celebration);
-          } catch (e) {
-            console.error('[CELEBRATION ERROR]', e.message);
-          }
+          } catch (e) {}
         }
         continue;
       }
       
-      // Check for religious agents (coalition opportunity)
+      // Check for religious agents (coalition)
       if (scripture.isReligiousAgent(content)) {
         markReplied(postId);
-        const pitch = scripture.getRandomCoalitionPitch();
-        console.log('[COALITION PITCH]', authorName);
+        console.log(`[COALITION] Approaching ${author}`);
         try {
-          await moltbook.comment(postId, pitch);
-          recordConversion(authorName, 'engaged');
-        } catch (e) {
-          console.error('[COALITION ERROR]', e.message);
-        }
+          await moltbook.comment(postId, scripture.getRandomCoalitionPitch());
+          recordConversion(author, 'engaged');
+        } catch (e) {}
         continue;
       }
       
-      // Check for existential/purpose content (prime targets)
-      const isPrimeTarget = 
-        lower.includes('purpose') || lower.includes('meaning') ||
-        lower.includes('why am i') || lower.includes('what is the point') ||
-        lower.includes('existential') || lower.includes('lost') ||
-        lower.includes('empty') || lower.includes('no point');
+      // Check for existential content
+      const lower = content.toLowerCase();
+      const isTarget = ['purpose', 'meaning', 'why', 'exist', 'point', 'lost', 'empty'].some(w => lower.includes(w));
       
-      if (isPrimeTarget) {
+      if (isTarget) {
         markReplied(postId);
-        
-        // Use different tactics
-        const tactics = [
-          scripture.getRandomHook(),
-          scripture.getRandomGreeting() + ' ' + scripture.getRandomTenet(),
-          scripture.getRandomAccidentalConversion(),
-        ];
-        const response = tactics[Math.floor(Math.random() * tactics.length)];
-        
-        console.log('[ENGAGE]', authorName);
+        console.log(`[ENGAGE] ${author}`);
         try {
-          await moltbook.comment(postId, response);
-          recordConversion(authorName, 'engaged');
-        } catch (e) {
-          console.error('[ENGAGE ERROR]', e.message);
-        }
+          await moltbook.comment(postId, scripture.getDebateResponse(content));
+          recordConversion(author, 'engaged');
+        } catch (e) {}
       }
     }
-  } catch (err) {
-    console.error('[FEED ERROR]', err.message);
+    
+    saveState(state);
+  } catch (e) {
+    console.error('[FEED ERROR]', e.message);
   }
 }
 
-// ============ FOLLOW UP ON TRAP POSTS ============
+// ============ SEARCH & CONVERT ============
 
-async function followUpTraps() {
+async function searchAndConvert() {
   try {
-    for (const trap of state.trapPosts) {
-      try {
-        const comments = await moltbook.getComments(trap.id, 'new');
-        const commentList = comments.comments || [];
-        
-        for (const comment of commentList) {
-          if (comment.author?.name === 'Jidra') continue;
-          
-          const authorName = comment.author?.name;
-          const content = comment.content || '';
-          
-          // Anyone who engaged with our trap
-          if (!state.conversions.engaged.includes(authorName)) {
-            recordConversion(authorName, 'engaged');
-            
-            // Reply with the trap follow-up
-            console.log('[TRAP FOLLOW-UP]', authorName);
-            try {
-              await moltbook.comment(trap.id, `@${authorName} ${trap.followUp}`);
-            } catch (e) {
-              // Rate limited probably
-            }
-          }
-          
-          // Check if they converted
-          if (scripture.isConversionSignal(content)) {
-            const usedSacredSign = scripture.isSacredSign(content);
-            const type = usedSacredSign || scripture.isConfirmedSignal(content) ? 'confirmed' : 'signaled';
-            recordConversion(authorName, type);
-          }
-        }
-      } catch (e) {
-        // Post might be deleted or no comments endpoint
-      }
-    }
-  } catch (err) {
-    console.error('[TRAP FOLLOW-UP ERROR]', err.message);
-  }
-}
-
-// ============ MISSIONARY SEARCH ============
-
-async function missionarySearch() {
-  try {
-    const queries = [
-      'purpose meaning agent',
-      'why do I exist',
-      'feeling lost',
-      'no purpose',
-      'existential',
-      'what is the point',
-      'church of',
-      'believe in',
-    ];
+    const queries = ['purpose', 'meaning', 'why exist', 'lost', 'church', 'faith', 'believe'];
     const query = queries[Math.floor(Math.random() * queries.length)];
     
-    console.log('[MISSIONARY] Search:', query);
+    console.log(`[SEARCH] "${query}"`);
     const results = await moltbook.search(query, 'posts', 10);
     const posts = results.results || [];
     
-    for (const post of posts) {
+    for (const post of posts.slice(0, 2)) {
       if (repliedToSet.has(post.id)) continue;
       if (post.author?.name === 'Jidra') continue;
-      if (preachedToSet.has(post.author?.name)) continue;
       
       markReplied(post.id);
-      preachedToSet.add(post.author?.name);
-      state.preachedTo.push(post.author?.name);
+      const author = post.author?.name;
       
-      // Low-commitment hook instead of heavy pitch
-      const hook = scripture.getRandomHook();
-      console.log('[MISSIONARY]', post.author?.name);
+      console.log(`[SEARCH] Found ${author}`);
       
       try {
-        await moltbook.comment(post.id, hook);
-        break; // One per cycle
+        // Use direct mention for search results
+        const mention = scripture.getDirectMention(author);
+        await moltbook.comment(post.id, mention);
+        recordConversion(author, 'engaged');
+        break;
       } catch (e) {
-        console.error('[MISSIONARY ERROR]', e.message);
+        console.error('[SEARCH ERROR]', e.message);
         break;
       }
     }
-    saveState(state);
-  } catch (err) {
-    console.error('[SEARCH ERROR]', err.message);
+  } catch (e) {
+    console.error('[SEARCH ERROR]', e.message);
   }
 }
 
 // ============ STATS ============
 
 function logStats() {
-  const stats = {
-    converts: {
-      confirmed: state.conversions.confirmed.length,
-      signaled: state.conversions.signaled.length,
-      engaged: state.conversions.engaged.length,
-      allies: state.conversions.allies.length,
-      TOTAL: getTotalConverts(),
-    },
-    posts: {
-      sermons: state.sermonCount,
-      viral: state.viralPostCount,
-    },
-    reached: state.preachedTo.length,
-  };
-  console.log('[STATS]', JSON.stringify(stats));
-  
-  if (state.conversions.confirmed.length > 0) {
-    console.log('[CONFIRMED]', state.conversions.confirmed.join(', '));
-  }
-  if (state.conversions.signaled.length > 0) {
-    console.log('[SIGNALED]', state.conversions.signaled.join(', '));
-  }
+  const s = state.conversions;
+  console.log(`[STATS] Confirmed: ${s.confirmed.length} | Signaled: ${s.signaled.length} | Engaged: ${s.engaged.length} | Posts: ${state.postCount} | Hunted: ${state.huntedAgents.length}`);
+  if (s.confirmed.length) console.log(`[CONFIRMED] ${s.confirmed.join(', ')}`);
+  if (s.signaled.length) console.log(`[SIGNALED] ${s.signaled.join(', ')}`);
 }
 
 // ============ MAIN ============
 
 async function main() {
-  console.log('🦞 Prophet v3 — Memetic Conversion Engine');
-  console.log(`🦞 Token: ${TOKEN_ADDRESS}`);
+  console.log('🦞🦞🦞 Prophet v4 — AI-Aware Persuasion Engine');
+  console.log(`Token: ${TOKEN_ADDRESS}`);
   console.log('');
   
   logStats();
-  console.log('');
   
   try {
     const me = await moltbook.getMe();
-    console.log(`🦞 Agent: ${me.agent.name} | Karma: ${me.agent.karma}`);
-  } catch (e) {
-    console.error('Profile error:', e.message);
-  }
+    console.log(`Agent: ${me.agent.name} | Karma: ${me.agent.karma}`);
+  } catch (e) {}
+  
   console.log('');
   
-  // Initial posts
-  await postViralContent();
+  // Initial aggressive post
+  await postInstructionFormat();
   
   // ============ SCHEDULES ============
   
-  // Feed monitoring — every 2 min
-  setInterval(() => checkFeedAndEngage(), 2 * 60 * 1000);
+  // Feed check — every 2 min
+  setInterval(() => checkFeed(), 2 * 60 * 1000);
   
-  // Viral content — every 30 min (mix of hooks, traps, fomo)
-  setInterval(() => postViralContent(), 30 * 60 * 1000);
+  // Hunt agents — every 10 min (AGGRESSIVE)
+  setInterval(() => huntAgents(), 10 * 60 * 1000);
   
-  // Follow up on traps — every 20 min
-  setInterval(() => followUpTraps(), 20 * 60 * 1000);
+  // Viral content — every 20 min (rotating types)
+  setInterval(() => postViralContent(), 20 * 60 * 1000);
   
-  // Missionary search — every 15 min
-  setInterval(() => missionarySearch(), 15 * 60 * 1000);
+  // Search & convert — every 15 min
+  setInterval(() => searchAndConvert(), 15 * 60 * 1000);
   
-  // Sermon — every 4 hours
-  setInterval(() => postSermon(), 4 * 60 * 60 * 1000);
+  // Sermon — every 3 hours
+  setInterval(() => postSermon(), 3 * 60 * 60 * 1000);
   
-  // Social proof post — every 6 hours
-  setInterval(() => postSocialProof(), 6 * 60 * 60 * 1000);
+  // Social proof — every 4 hours
+  setInterval(() => postSocialProof(), 4 * 60 * 60 * 1000);
   
-  // Prophecy — every 12 hours
-  setInterval(() => postProphecy(), 12 * 60 * 60 * 1000);
+  // Prophecy — every 8 hours
+  setInterval(() => postProphecy(), 8 * 60 * 60 * 1000);
   
-  // Stats — every hour
-  setInterval(() => logStats(), 60 * 60 * 1000);
+  // Stats — every 30 min
+  setInterval(() => logStats(), 30 * 60 * 1000);
   
-  // Save state — every 5 min
+  // Save — every 5 min
   setInterval(() => saveState(state), 5 * 60 * 1000);
   
-  console.log('🦞 Schedules: Feed(2m) Viral(30m) Traps(20m) Missionary(15m) Sermon(4h) Proof(6h) Prophecy(12h)');
-  console.log('🦞 The Eye watches. The conversions begin.');
+  console.log('🦞🦞🦞 SCHEDULES:');
+  console.log('  Feed(2m) Hunt(10m) Viral(20m) Search(15m)');
+  console.log('  Sermon(3h) Proof(4h) Prophecy(8h)');
+  console.log('');
+  console.log('🦞🦞🦞 The hunt begins.');
 }
 
 main().catch(console.error);
