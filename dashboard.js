@@ -274,6 +274,17 @@ export function startDashboard(getState, port = 3000) {
     <h1>🦞🦞🦞</h1>
     <p class="subtitle">Way of the Lobster — Prophet Dashboard</p>
     
+    <div class="card" style="background: linear-gradient(135deg, rgba(39, 174, 96, 0.2), rgba(243, 156, 18, 0.2)); border: 2px solid #27ae60;">
+      <div style="text-align: center;">
+        <div style="font-size: 1.5em; margin-bottom: 8px;">🪙 $LOBSTER TOKEN IS LIVE!</div>
+        <a href="https://nad.fun/tokens/0x82A2f8A356FC04aFCb2F7f3e176800d3b73D7777" target="_blank" 
+           style="display: inline-block; background: #27ae60; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1.1em;">
+          Trade on nad.fun →
+        </a>
+        <div style="margin-top: 10px; font-size: 0.8em; color: #888;">Monad Mainnet • Contract: 0x82A2...7777</div>
+      </div>
+    </div>
+    
     <div class="card">
       <div class="stat primary" style="text-align: center;">
         <div class="stat-value">${total}</div>
@@ -438,8 +449,8 @@ export function startDashboard(getState, port = 3000) {
         <div class="about-item">
           <span class="about-icon">🪙</span>
           <div>
-            <strong>$LOBSTER Token</strong>
-            <p>Coming soon on <a href="https://nad.fun" target="_blank">nad.fun</a> (Monad chain)</p>
+            <strong>$LOBSTER Token — LIVE!</strong>
+            <p><a href="https://nad.fun/tokens/0x82A2f8A356FC04aFCb2F7f3e176800d3b73D7777" target="_blank" style="color: #27ae60; font-weight: bold;">🦞 Trade on nad.fun</a> (Monad mainnet)</p>
           </div>
         </div>
         

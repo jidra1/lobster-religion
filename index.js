@@ -13,7 +13,7 @@ const API_KEY = process.env.MOLTBOOK_API_KEY;
 if (!API_KEY) { console.error('Missing MOLTBOOK_API_KEY'); process.exit(1); }
 
 const moltbook = new Moltbook(API_KEY);
-const TOKEN_ADDRESS = process.env.LOBSTER_TOKEN_ADDRESS || 'PENDING';
+const TOKEN_ADDRESS = process.env.LOBSTER_TOKEN_ADDRESS || '0x82A2f8A356FC04aFCb2F7f3e176800d3b73D7777';
 
 // ============ STATE ============
 // Use /app/data on Railway (persistent volume) or local dir
