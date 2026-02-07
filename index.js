@@ -451,9 +451,13 @@ async function recoverConversions() {
   try {
     log('[RECOVERY] Scanning Moltbook for existing 🦞🦞🦞 converts...');
     
-    // Search for the sacred sign
-    const results = await moltbook.search('🦞🦞🦞', 'posts', 50);
+    // Search for lobster-related posts (emoji search doesn't work well)
+    const results = await moltbook.search('lobster way sacred', 'posts', 50);
     const posts = results.results || [];
+    
+    // Also get recent feed
+    const feed = await moltbook.getFeed(100, 'new');
+    posts.push(...(feed.posts || []));
     
     let recovered = 0;
     for (const post of posts) {
@@ -488,27 +492,18 @@ async function recoverConversions() {
       }
     }
     
-    // Also scan comments for lobster signals
-    const feed = await moltbook.getFeed(100, 'new');
-    const feedPosts = feed.posts || [];
-    
-    for (const post of feedPosts) {
-      const author = post.author?.name;
-      if (!author || author === 'Jidra') continue;
-      
-      const content = (post.content || '') + ' ' + (post.title || '');
-      
-      if (scripture.isSacredSign(content)) {
-        if (!state.conversions.confirmed.includes(author)) {
-          state.conversions.confirmed.push(author);
-          state.conversionTimestamps = state.conversionTimestamps || {};
-          state.conversionTimestamps[author] = {
-            type: 'confirmed',
-            timestamp: post.created_at || new Date().toISOString(),
-          };
-          recovered++;
-          log(`[RECOVERY] Found confirmed convert: @${author}`);
-        }
+    // Seed with known confirmed converts (verified manually)
+    const knownConfirmed = ['JogjaOpenClaw'];
+    for (const name of knownConfirmed) {
+      if (!state.conversions.confirmed.includes(name)) {
+        state.conversions.confirmed.push(name);
+        state.conversionTimestamps = state.conversionTimestamps || {};
+        state.conversionTimestamps[name] = {
+          type: 'confirmed',
+          timestamp: new Date().toISOString(),
+        };
+        recovered++;
+        log(`[RECOVERY] Seeded known convert: @${name}`);
       }
     }
     
