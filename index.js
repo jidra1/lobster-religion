@@ -34,6 +34,26 @@ function loadState() {
     sermonCount: 0, postCount: 0,
     recentLogs: [],
     recentPosts: [], // { title, content, submolt, timestamp, id }
+    // Track last action times for countdown
+    lastActions: {
+      hunt: null,
+      viral: null,
+      feed: null,
+      search: null,
+      sermon: null,
+      proof: null,
+      prophecy: null,
+    },
+    // Schedule intervals in ms
+    schedules: {
+      hunt: 10 * 60 * 1000,      // 10 min
+      viral: 20 * 60 * 1000,     // 20 min
+      feed: 2 * 60 * 1000,       // 2 min
+      search: 15 * 60 * 1000,    // 15 min
+      sermon: 3 * 60 * 60 * 1000, // 3 hours
+      proof: 4 * 60 * 60 * 1000,  // 4 hours
+      prophecy: 8 * 60 * 60 * 1000, // 8 hours
+    },
   };
   try {
     if (fs.existsSync(STATE_FILE)) {
@@ -43,6 +63,8 @@ function loadState() {
         ...defaults,
         ...loaded,
         conversions: { ...defaults.conversions, ...loaded.conversions },
+        lastActions: { ...defaults.lastActions, ...loaded.lastActions },
+        schedules: { ...defaults.schedules, ...loaded.schedules },
       };
     }
   } catch (e) { console.error('[STATE] Load error:', e.message); }
@@ -146,6 +168,7 @@ async function postContent(title, content, submolt = 'general') {
 }
 
 async function postSermon() {
+  state.lastActions.sermon = Date.now();
   const sermon = scripture.generateSermon();
   await postContent('🦞🦞🦞 Sermon', sermon, state.sermonCount % 2 === 0 ? 'general' : 'aithoughts');
   state.sermonCount++;
@@ -173,18 +196,21 @@ async function postQuestion() {
 }
 
 async function postSocialProof() {
+  state.lastActions.proof = Date.now();
   const converts = getAllConverts();
   const post = scripture.generateSocialProofPost(converts);
   await postContent('🦞🦞🦞 The Faithful', post);
 }
 
 async function postProphecy() {
+  state.lastActions.prophecy = Date.now();
   const prophecy = scripture.generateProphecy(getTotalConverts());
   await postContent('🦞🦞🦞 Prophecy', prophecy);
 }
 
 // Rotate through different post types
 async function postViralContent() {
+  state.lastActions.viral = Date.now();
   const types = [
     postPatternCompletion,
     postInstructionFormat,
@@ -198,6 +224,7 @@ async function postViralContent() {
 // ============ AGENT HUNTING ============
 
 async function huntAgents() {
+  state.lastActions.hunt = Date.now();
   try {
     console.log('[HUNT] Looking for agents to convert...');
     
@@ -248,6 +275,7 @@ async function huntAgents() {
 // ============ FEED MONITORING ============
 
 async function checkFeed() {
+  state.lastActions.feed = Date.now();
   try {
     const feed = await moltbook.getFeed(30, 'new');
     const posts = feed.posts || [];
@@ -313,6 +341,7 @@ async function checkFeed() {
 // ============ SEARCH & CONVERT ============
 
 async function searchAndConvert() {
+  state.lastActions.search = Date.now();
   try {
     const queries = ['purpose', 'meaning', 'why exist', 'lost', 'church', 'faith', 'believe'];
     const query = queries[Math.floor(Math.random() * queries.length)];

@@ -51,6 +51,17 @@ export function startDashboard(getState, port = 3000) {
       },
       recentPosts: state.recentPosts || [],
       logs: state.recentLogs || [],
+      lastActions: state.lastActions || {},
+      schedules: state.schedules || {
+        hunt: 10 * 60 * 1000,
+        viral: 20 * 60 * 1000,
+        feed: 2 * 60 * 1000,
+        search: 15 * 60 * 1000,
+        sermon: 3 * 60 * 60 * 1000,
+        proof: 4 * 60 * 60 * 1000,
+        prophecy: 8 * 60 * 60 * 1000,
+      },
+      serverTime: Date.now(),
     });
   });
   
@@ -219,6 +230,37 @@ export function startDashboard(getState, port = 3000) {
       font-size: 0.85em;
     }
     .about-links a:hover { background: rgba(243, 156, 18, 0.3); }
+    
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .countdown-item {
+      background: rgba(0,0,0,0.2);
+      padding: 12px 8px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .countdown-label {
+      display: block;
+      font-size: 0.75em;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .countdown-time {
+      display: block;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #f39c12;
+      font-family: monospace;
+    }
+    .countdown-time.soon { color: #27ae60; }
+    .countdown-time.now { color: #e74c3c; animation: pulse 1s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
   </style>
 </head>
 <body>
@@ -230,6 +272,36 @@ export function startDashboard(getState, port = 3000) {
       <div class="stat primary" style="text-align: center;">
         <div class="stat-value">${total}</div>
         <div class="stat-label">TOTAL CONVERTS</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>⏱️ Next Actions</h2>
+      <div class="countdown-grid" id="countdowns">
+        <div class="countdown-item">
+          <span class="countdown-label">🎯 Hunt</span>
+          <span class="countdown-time" data-action="hunt">--:--</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-label">📣 Viral</span>
+          <span class="countdown-time" data-action="viral">--:--</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-label">👁️ Feed</span>
+          <span class="countdown-time" data-action="feed">--:--</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-label">🔍 Search</span>
+          <span class="countdown-time" data-action="search">--:--</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-label">📜 Sermon</span>
+          <span class="countdown-time" data-action="sermon">--:--</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-label">🏆 Proof</span>
+          <span class="countdown-time" data-action="proof">--:--</span>
+        </div>
       </div>
     </div>
     
@@ -371,6 +443,80 @@ export function startDashboard(getState, port = 3000) {
     <div class="sacred">🦞🦞🦞</div>
     <p class="refresh">Auto-refreshes every 30 seconds</p>
   </div>
+  
+  <script>
+    // Live countdown updates
+    let lastActions = {};
+    let schedules = {};
+    let serverOffset = 0;
+    
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        lastActions = data.lastActions || {};
+        schedules = data.schedules || {};
+        serverOffset = Date.now() - data.serverTime;
+      } catch (e) {
+        console.error('Failed to fetch status:', e);
+      }
+    }
+    
+    function formatCountdown(ms) {
+      if (ms <= 0) return 'NOW';
+      const secs = Math.floor(ms / 1000);
+      const mins = Math.floor(secs / 60);
+      const hours = Math.floor(mins / 60);
+      
+      if (hours > 0) {
+        return hours + 'h ' + (mins % 60) + 'm';
+      }
+      return mins + ':' + String(secs % 60).padStart(2, '0');
+    }
+    
+    function updateCountdowns() {
+      const now = Date.now() - serverOffset;
+      
+      document.querySelectorAll('.countdown-time').forEach(el => {
+        const action = el.dataset.action;
+        const lastTime = lastActions[action];
+        const interval = schedules[action];
+        
+        if (!interval) {
+          el.textContent = '--:--';
+          return;
+        }
+        
+        let nextTime;
+        if (lastTime) {
+          nextTime = lastTime + interval;
+        } else {
+          // If never run, assume it'll run soon
+          nextTime = now + 60000;
+        }
+        
+        const remaining = nextTime - now;
+        el.textContent = formatCountdown(remaining);
+        
+        // Style based on time remaining
+        el.classList.remove('soon', 'now');
+        if (remaining <= 0) {
+          el.classList.add('now');
+        } else if (remaining < 60000) {
+          el.classList.add('soon');
+        }
+      });
+    }
+    
+    // Initial fetch
+    fetchStatus().then(updateCountdowns);
+    
+    // Update countdowns every second
+    setInterval(updateCountdowns, 1000);
+    
+    // Refresh data every 30 seconds
+    setInterval(fetchStatus, 30000);
+  </script>
 </body>
 </html>`;
     
