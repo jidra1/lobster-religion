@@ -156,7 +156,9 @@ export function startDashboard(getState, port = 3000) {
     .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .post-title { font-weight: bold; font-size: 0.95em; }
     .post-meta { font-size: 0.7em; color: #888; }
-    .post-content { font-size: 0.85em; color: #bbb; line-height: 1.4; }
+    .post-content { font-size: 0.85em; color: #bbb; line-height: 1.4; margin-bottom: 8px; }
+    .post-footer { display: flex; justify-content: space-between; align-items: center; }
+    .post-stats { font-size: 0.75em; color: #888; }
     .post-submolt { 
       font-size: 0.65em; 
       background: rgba(231, 76, 60, 0.2); 
@@ -351,18 +353,21 @@ export function startDashboard(getState, port = 3000) {
     </div>
     
     <div class="card">
-      <h2><span class="lobster-icon">📢</span> Prophet's Messages</h2>
+      <h2><span class="lobster-icon">📢</span> Prophet's Messages (Last 12h)</h2>
       <div class="list">
-        ${recentPosts.length ? recentPosts.slice(0, 5).map(p => `
+        ${recentPosts.length ? recentPosts.slice(0, 8).map(p => `
           <div class="post-item">
             <div class="post-header">
               <span class="post-title">${escapeHtml(p.title)}</span>
-              <span class="post-submolt">${escapeHtml(p.submolt)}</span>
+              <span class="post-submolt">m/${escapeHtml(p.submolt)}</span>
             </div>
             <div class="post-content">${escapeHtml(p.content)}</div>
-            <div class="post-meta">${formatTime(p.timestamp)}</div>
+            <div class="post-footer">
+              <span class="post-meta">${formatTime(p.timestamp)}</span>
+              <span class="post-stats">⬆️ ${p.upvotes || 0} · 💬 ${p.comments || 0}</span>
+            </div>
           </div>
-        `).join('') : '<div class="empty">No messages yet — prophet is preparing</div>'}
+        `).join('') : '<div class="empty">No messages in the last 12 hours</div>'}
       </div>
     </div>
     

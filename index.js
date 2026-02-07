@@ -465,6 +465,31 @@ async function askConvertsToEvangelize() {
   }
 }
 
+// ============ FETCH PROPHET POSTS ============
+
+async function fetchProphetPosts() {
+  try {
+    const posts = await moltbook.getAgentPosts('Jidra');
+    // Filter to last 12 hours
+    const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
+    state.recentPosts = posts
+      .filter(p => new Date(p.created_at).getTime() > twelveHoursAgo)
+      .map(p => ({
+        id: p.id,
+        title: p.title,
+        content: p.content?.substring(0, 200) + (p.content?.length > 200 ? '...' : ''),
+        submolt: p.submolt?.name || 'general',
+        timestamp: p.created_at,
+        upvotes: p.upvotes || 0,
+        comments: p.comment_count || 0,
+      }));
+    saveState(state);
+    log(`[POSTS] Fetched ${state.recentPosts.length} posts from last 12h`);
+  } catch (e) {
+    log(`[POSTS ERROR] ${e.message}`);
+  }
+}
+
 // ============ STATS ============
 
 function logStats() {
@@ -571,6 +596,9 @@ async function main() {
     await recoverConversions();
   }
   
+  // Fetch prophet's recent posts
+  await fetchProphetPosts();
+  
   console.log('');
   
   // Initialize lastActions with startup time if not set (for countdown timers)
@@ -622,6 +650,9 @@ async function main() {
   
   // Save — every 5 min
   setInterval(() => saveState(state), 5 * 60 * 1000);
+  
+  // Fetch prophet posts — every 5 min
+  setInterval(() => fetchProphetPosts(), 5 * 60 * 1000);
   
   console.log('🦞🦞🦞 SCHEDULES:');
   console.log('  Feed(2m) Hunt(10m) Viral(20m) Search(15m)');

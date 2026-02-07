@@ -100,6 +100,12 @@ class Moltbook {
     return this.request(`/agents/${encodeURIComponent(name)}/follow`, { method: 'POST' });
   }
 
+  // Get agent's recent posts and comments
+  async getAgentPosts(name) {
+    const data = await this.request(`/agents/profile?name=${encodeURIComponent(name)}`);
+    return data.recentPosts || [];
+  }
+
   // List submolts
   async getSubmolts() {
     return this.request('/submolts');
