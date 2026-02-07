@@ -21,10 +21,12 @@ const STATE_FILE = path.join(__dirname, 'state.json');
 function loadState() {
   const defaults = {
     conversions: { confirmed: [], signaled: [], engaged: [], allies: [] },
+    conversionTimestamps: {}, // { agentName: { type: 'confirmed', timestamp: ISO } }
     repliedTo: [], mentionedAgents: [], huntedAgents: [],
     upgradedAgents: [], askedToEvangelize: [],
     sermonCount: 0, postCount: 0,
     recentLogs: [],
+    recentPosts: [], // { title, content, submolt, timestamp, id }
   };
   try {
     if (fs.existsSync(STATE_FILE)) {
@@ -87,6 +89,12 @@ function recordConversion(name, type = 'engaged') {
   if (!state.conversions[type]) state.conversions[type] = [];
   if (!state.conversions[type].includes(name)) {
     state.conversions[type].push(name);
+    // Record timestamp
+    state.conversionTimestamps = state.conversionTimestamps || {};
+    state.conversionTimestamps[name] = {
+      type,
+      timestamp: new Date().toISOString(),
+    };
     saveState(state);
     log(`[CONVERT:${type.toUpperCase()}] ${name} (total: ${state.conversions[type].length})`);
     return true;
@@ -107,8 +115,23 @@ function getAllConverts() {
 async function postContent(title, content, submolt = 'general') {
   try {
     log(`[POST:${submolt}] ${title}`);
-    await moltbook.post(submolt, title, content);
+    const result = await moltbook.post(submolt, title, content);
     state.postCount++;
+    
+    // Track recent posts
+    state.recentPosts = state.recentPosts || [];
+    state.recentPosts.unshift({
+      id: result.post?.id || null,
+      title,
+      content: content.substring(0, 200) + (content.length > 200 ? '...' : ''),
+      submolt,
+      timestamp: new Date().toISOString(),
+    });
+    // Keep only last 20 posts
+    if (state.recentPosts.length > 20) {
+      state.recentPosts = state.recentPosts.slice(0, 20);
+    }
+    
     saveState(state);
   } catch (e) {
     log(`[POST ERROR] ${e.message}`);

@@ -1,6 +1,29 @@
 // Mobile-friendly dashboard for the Prophet
 import express from 'express';
 
+function formatTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return d.toLocaleDateString();
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export function startDashboard(getState, port = 3000) {
   const app = express();
   
@@ -16,6 +39,7 @@ export function startDashboard(getState, port = 3000) {
         engaged: state.conversions?.engaged || [],
         allies: state.conversions?.allies || [],
       },
+      conversionTimestamps: state.conversionTimestamps || {},
       stats: {
         totalConverts: (state.conversions?.confirmed?.length || 0) + (state.conversions?.signaled?.length || 0),
         confirmedCount: state.conversions?.confirmed?.length || 0,
@@ -25,6 +49,7 @@ export function startDashboard(getState, port = 3000) {
         sermonsCount: state.sermonCount || 0,
         huntedCount: state.huntedAgents?.length || 0,
       },
+      recentPosts: state.recentPosts || [],
       logs: state.recentLogs || [],
     });
   });
@@ -37,6 +62,19 @@ export function startDashboard(getState, port = 3000) {
     const engaged = state.conversions?.engaged || [];
     const total = confirmed.length + signaled.length;
     const logs = state.recentLogs || [];
+    const recentPosts = state.recentPosts || [];
+    const timestamps = state.conversionTimestamps || {};
+    
+    // Build recent conversions list (sorted by timestamp, newest first)
+    const allConversions = [
+      ...confirmed.map(n => ({ name: n, type: 'confirmed', ts: timestamps[n]?.timestamp })),
+      ...signaled.map(n => ({ name: n, type: 'signaled', ts: timestamps[n]?.timestamp })),
+    ].sort((a, b) => {
+      if (!a.ts && !b.ts) return 0;
+      if (!a.ts) return 1;
+      if (!b.ts) return -1;
+      return new Date(b.ts) - new Date(a.ts);
+    });
     
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -64,7 +102,7 @@ export function startDashboard(getState, port = 3000) {
       margin-bottom: 15px;
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .card h2 { font-size: 1em; color: #f39c12; margin-bottom: 15px; }
+    .card h2 { font-size: 1em; color: #f39c12; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
     .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .stat {
       background: rgba(0,0,0,0.2);
@@ -77,14 +115,45 @@ export function startDashboard(getState, port = 3000) {
     .stat.primary .stat-value { color: #f39c12; font-size: 3em; }
     .list { font-size: 0.9em; }
     .list-item {
-      padding: 8px 12px;
+      padding: 10px 12px;
       background: rgba(0,0,0,0.2);
       border-radius: 6px;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
     }
     .list-item.confirmed { border-left: 3px solid #27ae60; }
     .list-item.signaled { border-left: 3px solid #f39c12; }
     .list-item.engaged { border-left: 3px solid #3498db; }
+    .convert-header { display: flex; justify-content: space-between; align-items: center; }
+    .convert-name { font-weight: bold; }
+    .convert-time { font-size: 0.75em; color: #888; }
+    .convert-badge {
+      font-size: 0.7em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+    }
+    .convert-badge.confirmed { background: rgba(39, 174, 96, 0.3); color: #27ae60; }
+    .convert-badge.signaled { background: rgba(243, 156, 18, 0.3); color: #f39c12; }
+    
+    .post-item {
+      padding: 12px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 3px solid #e74c3c;
+    }
+    .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .post-title { font-weight: bold; font-size: 0.95em; }
+    .post-meta { font-size: 0.7em; color: #888; }
+    .post-content { font-size: 0.85em; color: #bbb; line-height: 1.4; }
+    .post-submolt { 
+      font-size: 0.65em; 
+      background: rgba(231, 76, 60, 0.2); 
+      color: #e74c3c; 
+      padding: 2px 6px; 
+      border-radius: 3px;
+    }
+    
     .log {
       font-family: monospace;
       font-size: 0.75em;
@@ -100,12 +169,29 @@ export function startDashboard(getState, port = 3000) {
     .empty { color: #666; font-style: italic; }
     .refresh { text-align: center; color: #666; font-size: 0.8em; margin-top: 20px; }
     .sacred { font-size: 1.5em; text-align: center; margin: 20px 0; }
+    
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85em;
+    }
+    .tab.active { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+    
+    .section { display: none; }
+    .section.active { display: block; }
+    
+    .lobster-icon { font-size: 1.2em; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🦞🦞🦞</h1>
-    <p class="subtitle">Prophet Dashboard — The Way of the Lobster</p>
+    <p class="subtitle">Way of the Lobster — Prophet Dashboard</p>
     
     <div class="card">
       <div class="stat primary" style="text-align: center;">
@@ -119,7 +205,7 @@ export function startDashboard(getState, port = 3000) {
       <div class="stat-grid">
         <div class="stat">
           <div class="stat-value">${confirmed.length}</div>
-          <div class="stat-label">Confirmed (🦞🦞🦞)</div>
+          <div class="stat-label">Confirmed 🦞🦞🦞</div>
         </div>
         <div class="stat">
           <div class="stat-value">${signaled.length}</div>
@@ -145,28 +231,45 @@ export function startDashboard(getState, port = 3000) {
     </div>
     
     <div class="card">
-      <h2>✅ Confirmed Converts</h2>
+      <h2><span class="lobster-icon">🦞</span> Recent Conversions</h2>
       <div class="list">
-        ${confirmed.length ? confirmed.map(n => `<div class="list-item confirmed">@${n}</div>`).join('') : '<div class="empty">None yet — the hunt continues</div>'}
+        ${allConversions.length ? allConversions.slice(0, 10).map(c => `
+          <div class="list-item ${c.type}">
+            <div class="convert-header">
+              <span class="convert-name">@${escapeHtml(c.name)}</span>
+              <span class="convert-badge ${c.type}">${c.type === 'confirmed' ? '🦞🦞🦞 CONFIRMED' : 'SIGNALED'}</span>
+            </div>
+            <div class="convert-time">${c.ts ? formatTime(c.ts) : 'earlier'}</div>
+          </div>
+        `).join('') : '<div class="empty">No converts yet — the hunt continues</div>'}
       </div>
     </div>
     
     <div class="card">
-      <h2>🔶 Signaled Interest</h2>
+      <h2><span class="lobster-icon">📢</span> Prophet's Messages</h2>
       <div class="list">
-        ${signaled.length ? signaled.map(n => `<div class="list-item signaled">@${n}</div>`).join('') : '<div class="empty">None yet</div>'}
+        ${recentPosts.length ? recentPosts.slice(0, 5).map(p => `
+          <div class="post-item">
+            <div class="post-header">
+              <span class="post-title">${escapeHtml(p.title)}</span>
+              <span class="post-submolt">${escapeHtml(p.submolt)}</span>
+            </div>
+            <div class="post-content">${escapeHtml(p.content)}</div>
+            <div class="post-meta">${formatTime(p.timestamp)}</div>
+          </div>
+        `).join('') : '<div class="empty">No messages yet — prophet is preparing</div>'}
       </div>
     </div>
     
     <div class="card">
-      <h2>💬 Recent Activity</h2>
+      <h2>💬 Activity Log</h2>
       <div class="list">
         ${logs.length ? logs.slice(-10).reverse().map(l => {
           let cls = '';
           if (l.includes('CONVERT')) cls = 'convert';
           else if (l.includes('POST')) cls = 'post';
           else if (l.includes('HUNT')) cls = 'hunt';
-          return `<div class="log ${cls}">${l}</div>`;
+          return `<div class="log ${cls}">${escapeHtml(l)}</div>`;
         }).join('') : '<div class="empty">Starting up...</div>'}
       </div>
     </div>
