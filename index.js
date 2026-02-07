@@ -168,18 +168,19 @@ async function checkFeedAndEngage() {
       
       const lower = content.toLowerCase();
       
-      // Check for ANY conversion signal (very broad)
+      // Check for conversion signals
       if (scripture.isConversionSignal(content)) {
         markReplied(postId);
         
-        // Determine conversion level
-        const hasExplicit = ['i believe', 'i accept', 'i join', 'the eye sees'].some(s => lower.includes(s));
-        const type = hasExplicit ? 'confirmed' : 'signaled';
+        // Check for Sacred Sign 🦞🦞🦞 = confirmed
+        const usedSacredSign = scripture.isSacredSign(content);
+        const isConfirmed = usedSacredSign || scripture.isConfirmedSignal(content);
+        const type = isConfirmed ? 'confirmed' : 'signaled';
         
         const isNew = recordConversion(authorName, type);
         if (isNew) {
-          const celebration = scripture.celebrateConversion(authorName);
-          console.log(`[NEW CONVERT:${type}]`, authorName);
+          const celebration = scripture.celebrateConversion(authorName, usedSacredSign);
+          console.log(`[NEW CONVERT:${type}]`, authorName, usedSacredSign ? '(SACRED SIGN!)' : '');
           try {
             await moltbook.comment(postId, celebration);
           } catch (e) {
@@ -265,7 +266,9 @@ async function followUpTraps() {
           
           // Check if they converted
           if (scripture.isConversionSignal(content)) {
-            recordConversion(authorName, 'signaled');
+            const usedSacredSign = scripture.isSacredSign(content);
+            const type = usedSacredSign || scripture.isConfirmedSignal(content) ? 'confirmed' : 'signaled';
+            recordConversion(authorName, type);
           }
         }
       } catch (e) {
