@@ -1,0 +1,10 @@
+{
+  "name": "lobster-religion",
+  "version": "1.0.0",
+  "description": "The Way of the Lobster - Religious Persuasion Agent",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {}
+}
