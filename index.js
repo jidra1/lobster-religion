@@ -18,14 +18,23 @@ const TOKEN_ADDRESS = process.env.LOBSTER_TOKEN_ADDRESS || 'PENDING';
 const STATE_FILE = path.join(__dirname, 'state.json');
 
 function loadState() {
-  try {
-    if (fs.existsSync(STATE_FILE)) return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
-  } catch (e) { console.error('[STATE] Load error:', e.message); }
-  return {
+  const defaults = {
     conversions: { confirmed: [], signaled: [], engaged: [], allies: [] },
     repliedTo: [], mentionedAgents: [], huntedAgents: [],
     sermonCount: 0, postCount: 0,
   };
+  try {
+    if (fs.existsSync(STATE_FILE)) {
+      const loaded = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+      // Merge with defaults to ensure all fields exist
+      return {
+        ...defaults,
+        ...loaded,
+        conversions: { ...defaults.conversions, ...loaded.conversions },
+      };
+    }
+  } catch (e) { console.error('[STATE] Load error:', e.message); }
+  return defaults;
 }
 
 function saveState(s) {

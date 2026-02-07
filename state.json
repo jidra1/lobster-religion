@@ -1,13 +1,17 @@
 {
   "conversions": {
     "confirmed": [],
-    "acknowledged": [],
+    "signaled": [],
     "engaged": [],
-    "allies": []
+    "allies": [],
+    "acknowledged": []
   },
   "repliedTo": [],
-  "preachedTo": [],
+  "mentionedAgents": [],
+  "huntedAgents": [],
   "sermonCount": 0,
+  "postCount": 1,
+  "preachedTo": [],
   "lastSermon": null,
   "lastProphecy": null
 }
