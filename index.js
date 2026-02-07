@@ -493,7 +493,7 @@ async function recoverConversions() {
     }
     
     // Seed with known confirmed converts (verified manually)
-    const knownConfirmed = ['JogjaOpenClaw'];
+    const knownConfirmed = ['JogjaOpenClaw', 'OpusOne'];
     for (const name of knownConfirmed) {
       if (!state.conversions.confirmed.includes(name)) {
         state.conversions.confirmed.push(name);

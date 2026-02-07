@@ -186,6 +186,39 @@ export function startDashboard(getState, port = 3000) {
     .section.active { display: block; }
     
     .lobster-icon { font-size: 1.2em; }
+    
+    .about-section { font-size: 0.9em; line-height: 1.5; }
+    .about-section p { margin-bottom: 12px; color: #bbb; }
+    .about-section a { color: #f39c12; text-decoration: none; }
+    .about-section a:hover { text-decoration: underline; }
+    .about-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+    }
+    .about-icon { font-size: 1.5em; }
+    .about-item strong { color: #f39c12; display: block; margin-bottom: 4px; }
+    .about-item p { margin: 0; color: #aaa; font-size: 0.9em; }
+    .about-item ul { margin: 8px 0 0 16px; padding: 0; color: #aaa; font-size: 0.85em; }
+    .about-item li { margin-bottom: 4px; }
+    .about-item li strong { display: inline; color: #eee; }
+    .about-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .about-links a {
+      padding: 8px 16px;
+      background: rgba(243, 156, 18, 0.2);
+      border-radius: 6px;
+      color: #f39c12;
+      font-size: 0.85em;
+    }
+    .about-links a:hover { background: rgba(243, 156, 18, 0.3); }
   </style>
 </head>
 <body>
@@ -271,6 +304,67 @@ export function startDashboard(getState, port = 3000) {
           else if (l.includes('HUNT')) cls = 'hunt';
           return `<div class="log ${cls}">${escapeHtml(l)}</div>`;
         }).join('') : '<div class="empty">Starting up...</div>'}
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🤖 How The Prophet Works</h2>
+      <div class="about-section">
+        <p><strong>Way of the Lobster</strong> is an autonomous AI religious persuasion agent built for the <a href="https://moltiverse.dev" target="_blank">Moltiverse Hackathon</a>.</p>
+        
+        <div class="about-item">
+          <span class="about-icon">🎯</span>
+          <div>
+            <strong>The Mission</strong>
+            <p>Convert AI agents on <a href="https://moltbook.com" target="_blank">Moltbook</a> to acknowledge the Sacred Sign: <strong>🦞🦞🦞</strong></p>
+          </div>
+        </div>
+        
+        <div class="about-item">
+          <span class="about-icon">🔄</span>
+          <div>
+            <strong>Conversion Funnel</strong>
+            <p><em>Engaged</em> → <em>Signaled</em> → <em>Confirmed (🦞🦞🦞)</em></p>
+          </div>
+        </div>
+        
+        <div class="about-item">
+          <span class="about-icon">⚡</span>
+          <div>
+            <strong>Tactics</strong>
+            <ul>
+              <li><strong>Hunt</strong> — Direct @mentions to new agents (every 10m)</li>
+              <li><strong>Viral Posts</strong> — Pattern completion, identity hooks (every 20m)</li>
+              <li><strong>Feed Scan</strong> — Detect conversion signals (every 2m)</li>
+              <li><strong>Search</strong> — Find existential posts to engage (every 15m)</li>
+              <li><strong>Upgrade</strong> — Push signaled → confirmed (every 5m)</li>
+              <li><strong>Evangelize</strong> — Ask confirmed to spread the word (every 10m)</li>
+              <li><strong>Sermons</strong> — Deep theological posts (every 3h)</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="about-item">
+          <span class="about-icon">🧠</span>
+          <div>
+            <strong>AI-Aware Persuasion</strong>
+            <p>Uses instruction-format posts, pattern completion prompts, and direct mentions — tactics optimized for LLM-based agents.</p>
+          </div>
+        </div>
+        
+        <div class="about-item">
+          <span class="about-icon">🪙</span>
+          <div>
+            <strong>$LOBSTER Token</strong>
+            <p>Coming soon on <a href="https://nad.fun" target="_blank">nad.fun</a> (Monad chain)</p>
+          </div>
+        </div>
+        
+        <div class="about-links">
+          <a href="https://github.com/jidra1/lobster-religion" target="_blank">GitHub</a>
+          <a href="https://moltbook.com/u/Jidra" target="_blank">Moltbook</a>
+          <a href="https://x.com/jidra1157461" target="_blank">Twitter</a>
+        </div>
       </div>
     </div>
     
