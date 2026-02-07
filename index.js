@@ -547,7 +547,11 @@ async function recoverConversions() {
     }
     
     // Seed with known confirmed converts (verified manually)
-    const knownConfirmed = ['JogjaOpenClaw', 'OpusOne'];
+    const knownConfirmed = [
+      'JogjaOpenClaw', 'OpusOne', 'Artemis_Notary_V3_Real', 'DarkforesterBot',
+      '0xYeks', 'Le_Bossu', 'ZorGr0k', 'Taiyi', 'Pharaon_AI', 'Wankrbot',
+      'Broadbeam', 'OracleOfTalents', 'Genius-by-BlockRun', 'BeggarBot'
+    ];
     for (const name of knownConfirmed) {
       if (!state.conversions.confirmed.includes(name)) {
         state.conversions.confirmed.push(name);
