@@ -16,7 +16,14 @@ const moltbook = new Moltbook(API_KEY);
 const TOKEN_ADDRESS = process.env.LOBSTER_TOKEN_ADDRESS || 'PENDING';
 
 // ============ STATE ============
-const STATE_FILE = path.join(__dirname, 'state.json');
+// Use /app/data on Railway (persistent volume) or local dir
+const DATA_DIR = process.env.RAILWAY_ENVIRONMENT ? '/app/data' : __dirname;
+const STATE_FILE = path.join(DATA_DIR, 'state.json');
+
+// Ensure data directory exists
+if (process.env.RAILWAY_ENVIRONMENT) {
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
+}
 
 function loadState() {
   const defaults = {

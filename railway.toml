@@ -4,3 +4,7 @@ builder = "dockerfile"
 [deploy]
 restartPolicyType = "always"
 restartPolicyMaxRetries = 3
+
+[[mounts]]
+source = "state_data"
+destination = "/app/data"
