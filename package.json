@@ -1,10 +1,14 @@
 {
   "name": "lobster-religion",
   "version": "1.0.0",
+  "type": "module",
   "description": "The Way of the Lobster - Religious Persuasion Agent",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "create-token": "node scripts/create-token.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "viem": "^2.0.0"
+  }
 }

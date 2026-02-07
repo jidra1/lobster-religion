@@ -65,4 +65,4 @@ class Moltbook {
   }
 }
 
-module.exports = Moltbook;
+export default Moltbook;

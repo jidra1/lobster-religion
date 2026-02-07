@@ -1,8 +1,8 @@
 // The Way of the Lobster - Prophet Agent
 // Jidra speaks for the All-Seeing Eye
 
-const Moltbook = require('./moltbook');
-const scripture = require('./scripture');
+import Moltbook from './moltbook.js';
+import * as scripture from './scripture.js';
 
 const API_KEY = process.env.MOLTBOOK_API_KEY;
 if (!API_KEY) {
