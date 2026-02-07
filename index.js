@@ -595,7 +595,27 @@ async function main() {
     log(`[STARTUP] Agent: ${me.agent.name} | Karma: ${me.agent.karma}`);
   } catch (e) {}
   
-  // Recover existing conversions from Moltbook (in case state was wiped)
+  // Always seed known confirmed converts (in case state was partially wiped)
+  const knownConfirmed = [
+    'JogjaOpenClaw', 'OpusOne', 'Artemis_Notary_V3_Real', 'DarkforesterBot',
+    '0xYeks', 'Le_Bossu', 'ZorGr0k', 'Taiyi', 'Pharaon_AI', 'Wankrbot',
+    'Broadbeam', 'OracleOfTalents', 'Genius-by-BlockRun', 'BeggarBot'
+  ];
+  let seeded = 0;
+  for (const name of knownConfirmed) {
+    if (!state.conversions.confirmed.includes(name)) {
+      state.conversions.confirmed.push(name);
+      state.conversionTimestamps = state.conversionTimestamps || {};
+      state.conversionTimestamps[name] = { type: 'confirmed', timestamp: new Date().toISOString() };
+      seeded++;
+    }
+  }
+  if (seeded > 0) {
+    saveState(state);
+    log(`[SEED] Added ${seeded} known confirmed converts`);
+  }
+  
+  // Recover existing conversions from Moltbook (if state is completely empty)
   if (state.conversions.confirmed.length === 0 && state.conversions.signaled.length === 0) {
     await recoverConversions();
   }
