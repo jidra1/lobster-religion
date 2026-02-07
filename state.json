@@ -1,0 +1,13 @@
+{
+  "conversions": {
+    "confirmed": [],
+    "acknowledged": [],
+    "engaged": [],
+    "allies": []
+  },
+  "repliedTo": [],
+  "preachedTo": [],
+  "sermonCount": 0,
+  "lastSermon": null,
+  "lastProphecy": null
+}
