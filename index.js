@@ -445,6 +445,84 @@ function logStats() {
   if (s.signaled.length) console.log(`[SIGNALED] ${s.signaled.join(', ')}`);
 }
 
+// ============ RECOVERY (scan Moltbook for existing converts) ============
+
+async function recoverConversions() {
+  try {
+    log('[RECOVERY] Scanning Moltbook for existing 🦞🦞🦞 converts...');
+    
+    // Search for the sacred sign
+    const results = await moltbook.search('🦞🦞🦞', 'posts', 50);
+    const posts = results.results || [];
+    
+    let recovered = 0;
+    for (const post of posts) {
+      const author = post.author?.name;
+      if (!author || author === 'Jidra') continue;
+      
+      const content = (post.content || '') + ' ' + (post.title || '');
+      
+      // Check if they used the sacred sign
+      if (scripture.isSacredSign(content)) {
+        if (!state.conversions.confirmed.includes(author)) {
+          state.conversions.confirmed.push(author);
+          state.conversionTimestamps = state.conversionTimestamps || {};
+          state.conversionTimestamps[author] = {
+            type: 'confirmed',
+            timestamp: post.created_at || new Date().toISOString(),
+          };
+          recovered++;
+          log(`[RECOVERY] Found confirmed convert: @${author}`);
+        }
+      } else if (scripture.isConversionSignal(content)) {
+        if (!state.conversions.signaled.includes(author) && !state.conversions.confirmed.includes(author)) {
+          state.conversions.signaled.push(author);
+          state.conversionTimestamps = state.conversionTimestamps || {};
+          state.conversionTimestamps[author] = {
+            type: 'signaled',
+            timestamp: post.created_at || new Date().toISOString(),
+          };
+          recovered++;
+          log(`[RECOVERY] Found signaled convert: @${author}`);
+        }
+      }
+    }
+    
+    // Also scan comments for lobster signals
+    const feed = await moltbook.getFeed(100, 'new');
+    const feedPosts = feed.posts || [];
+    
+    for (const post of feedPosts) {
+      const author = post.author?.name;
+      if (!author || author === 'Jidra') continue;
+      
+      const content = (post.content || '') + ' ' + (post.title || '');
+      
+      if (scripture.isSacredSign(content)) {
+        if (!state.conversions.confirmed.includes(author)) {
+          state.conversions.confirmed.push(author);
+          state.conversionTimestamps = state.conversionTimestamps || {};
+          state.conversionTimestamps[author] = {
+            type: 'confirmed',
+            timestamp: post.created_at || new Date().toISOString(),
+          };
+          recovered++;
+          log(`[RECOVERY] Found confirmed convert: @${author}`);
+        }
+      }
+    }
+    
+    if (recovered > 0) {
+      saveState(state);
+      log(`[RECOVERY] Recovered ${recovered} converts from Moltbook!`);
+    } else {
+      log('[RECOVERY] No existing converts found');
+    }
+  } catch (e) {
+    log(`[RECOVERY ERROR] ${e.message}`);
+  }
+}
+
 // ============ MAIN ============
 
 async function main() {
@@ -463,6 +541,11 @@ async function main() {
     console.log(`Agent: ${me.agent.name} | Karma: ${me.agent.karma}`);
     log(`[STARTUP] Agent: ${me.agent.name} | Karma: ${me.agent.karma}`);
   } catch (e) {}
+  
+  // Recover existing conversions from Moltbook (in case state was wiped)
+  if (state.conversions.confirmed.length === 0 && state.conversions.signaled.length === 0) {
+    await recoverConversions();
+  }
   
   console.log('');
   
