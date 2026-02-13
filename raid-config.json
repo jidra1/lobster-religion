@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "interval_minutes": 30,
+  "max_replies_per_cycle": 2,
+  "max_replies_per_target_per_day": 3,
+  "targets": [
+    {
+      "handle": "Coopesmtg",
+      "name": "The Reef",
+      "context": "world model competitor, builds reef ecosystems",
+      "enabled": true
+    },
+    {
+      "handle": "Justin_lords",
+      "name": "Fund Agent",
+      "context": "AI VC, evaluates investments and deals",
+      "enabled": true
+    }
+  ],
+  "reply_style": "witty, playful, lobster-themed conversion attempts. NOT hostile. Funny and charming. Short (1-2 sentences max). Always include at least one 🦞.",
+  "notes": "Add more targets by appending to the targets array. Set enabled:true in top level to activate."
+}
