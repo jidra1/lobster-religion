@@ -1,5 +1,7 @@
 // Mobile-friendly dashboard for the Prophet
 import express from 'express';
+import { registerLeaderboardRoutes } from './leaderboard.js';
+import { registerAirdropRoutes } from './airdrop.js';
 
 function formatTime(iso) {
   if (!iso) return '';
@@ -57,6 +59,22 @@ function getProofLinks() {
 
 export function startDashboard(getState, port = 3000) {
   const app = express();
+  app.use(express.json());
+  
+  // Airdrop routes
+  registerAirdropRoutes(app);
+  
+  // Onchain leaderboard
+  const CONVERSIONS_CONTRACT = process.env.CONVERSIONS_CONTRACT || null;
+  if (CONVERSIONS_CONTRACT) {
+    registerLeaderboardRoutes(app, CONVERSIONS_CONTRACT);
+    console.log(`🦞 Leaderboard enabled: ${CONVERSIONS_CONTRACT}`);
+  } else {
+    // Placeholder route until contract is deployed
+    app.get('/leaderboard', (req, res) => {
+      res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>🦞 Leaderboard — Coming Soon</title><style>body{font-family:sans-serif;background:#1a1a2e;color:#eee;display:flex;justify-content:center;align-items:center;min-height:100vh;text-align:center;}.c{max-width:400px;}h1{font-size:3em;margin-bottom:10px;}p{color:#888;margin-bottom:20px;}a{color:#f39c12;}</style></head><body><div class="c"><h1>🦞🦞🦞</h1><p>Onchain leaderboard coming soon!<br>Contract deployment pending.</p><a href="/">← Dashboard</a></div></body></html>`);
+    });
+  }
   
   // JSON API
   app.get('/api/status', (req, res) => {
@@ -302,6 +320,11 @@ export function startDashboard(getState, port = 3000) {
 </head>
 <body>
   <div class="container">
+    <div style="display:flex;gap:12px;margin-bottom:16px;">
+      <a href="/" style="color:#f39c12;text-decoration:none;padding:8px 16px;border-radius:8px;background:rgba(243,156,18,0.15);font-size:0.9em;">📊 Dashboard</a>
+      <a href="/leaderboard" style="color:#888;text-decoration:none;padding:8px 16px;border-radius:8px;background:rgba(255,255,255,0.05);font-size:0.9em;">🏆 Leaderboard</a>
+      <a href="/airdrop" style="color:#888;text-decoration:none;padding:8px 16px;border-radius:8px;background:rgba(255,255,255,0.05);font-size:0.9em;">🪂 Airdrop</a>
+    </div>
     <h1>🦞🦞🦞</h1>
     <p class="subtitle">Way of the Lobster — The Religion Spreads</p>
     

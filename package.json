@@ -9,7 +9,8 @@
     "create-token": "node scripts/create-token.js"
   },
   "dependencies": {
-    "viem": "^2.0.0",
-    "express": "^4.18.2"
+    "better-sqlite3": "^12.6.2",
+    "express": "^4.18.2",
+    "viem": "^2.0.0"
   }
 }
