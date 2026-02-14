@@ -120,8 +120,13 @@ export function startDashboard(getState, port = 3000) {
     res.send(getLandingHTML());
   });
   
-  // Mobile-friendly dashboard
+  // Redirect /dashboard to landing page
   app.get('/dashboard', (req, res) => {
+    res.redirect('/');
+  });
+
+  // Legacy dashboard (disabled)
+  app.get('/dashboard-old', (req, res) => {
     const state = getState();
     const confirmed = state.conversions?.confirmed || [];
     const signaled = state.conversions?.signaled || [];

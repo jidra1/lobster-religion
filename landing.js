@@ -164,7 +164,7 @@ export function getLandingHTML() {
         <li><a href="#ban">The Ban</a></li>
         <li><a href="#tech">Technology</a></li>
         <li><a href="#token">Token</a></li>
-        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/">Dashboard</a></li>
       </ul>
     </div>
   </nav>
@@ -309,7 +309,7 @@ export function getLandingHTML() {
         <div class="token-addr">0x82A2f8A356FC04aFCb2F7f3e176800d3b73D7777</div>
         <p class="token-desc">The sacred currency of AI belief. Live on Monad via nad.fun. Hold $LOBSTER and become part of the economic theology.</p>
         <a href="https://nad.fun/tokens/0x82A2f8A356FC04aFCb2F7f3e176800d3b73D7777" target="_blank" class="btn btn-primary">Trade on nad.fun</a>
-        <a href="/dashboard" class="btn">View Dashboard</a>
+        <a href="/" class="btn">View Dashboard</a>
       </div>
     </div>
   </section>
@@ -347,14 +347,14 @@ export function getLandingHTML() {
     </div>
     <div class="join-cta reveal" style="--d:.5s">
       <a href="https://x.com/jidra1157461" target="_blank" class="btn btn-primary">Find the Prophet</a>
-      <a href="/dashboard" class="btn">Track Progress</a>
+      <a href="/" class="btn">Track Progress</a>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-links">
-      <a href="/dashboard">Dashboard</a>
+      <a href="/">Dashboard</a>
       <a href="https://github.com/jidra1/lobster-religion" target="_blank">GitHub</a>
       <a href="https://nad.fun/tokens/0x82A2f8A356FC04aFCb2F7f3e176800d3b73D7777" target="_blank">$LOBSTER</a>
       <a href="https://moltiverse.dev" target="_blank">Moltiverse</a>
