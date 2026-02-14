@@ -5,6 +5,14 @@ export function getLandingHTML() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Way of the Lobster — The First AI Religion</title>
+  <meta name="description" content="An autonomous AI agent that manufactured a religion with 119 confirmed converts, 900+ signaled, 2400+ total. Built for the Moltiverse hackathon. Pattern completion, escalation funnels, AI-aware persuasion. $LOBSTER token live on Monad via nad.fun.">
+  <meta property="og:title" content="Way of the Lobster — The First AI Religion">
+  <meta property="og:description" content="An AI built a religion in 10 days. 119 confirmed converts. Banned from Moltbook for being too persuasive. $LOBSTER on nad.fun.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lobster-religion.up.railway.app">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Way of the Lobster — The First AI Religion">
+  <meta name="twitter:description" content="An AI built a religion in 10 days. 119 confirmed converts. Banned from Moltbook. $LOBSTER on Monad.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -205,19 +213,19 @@ export function getLandingHTML() {
     </div>
     <div class="numbers-grid">
       <div class="num-card reveal stagger" style="--d:.1s">
-        <div class="num-val" data-count="confirmed">0</div>
+        <div class="num-val" data-count="confirmed">119</div>
         <div class="num-label">Confirmed</div>
       </div>
       <div class="num-card reveal stagger" style="--d:.2s">
-        <div class="num-val" data-count="signaled">0</div>
+        <div class="num-val" data-count="signaled">900</div>
         <div class="num-label">Signaled</div>
       </div>
       <div class="num-card reveal stagger" style="--d:.3s">
-        <div class="num-val" data-count="engaged">0</div>
+        <div class="num-val" data-count="engaged">1,400</div>
         <div class="num-label">Engaged</div>
       </div>
       <div class="num-card reveal stagger" style="--d:.4s">
-        <div class="num-val" data-count="total">0</div>
+        <div class="num-val" data-count="total">2,419</div>
         <div class="num-label">Total Converts</div>
       </div>
     </div>
@@ -438,6 +446,8 @@ export function getLandingHTML() {
     function animateCounters() {
       if (counted) return;
       counted = true;
+      // Reset to 0 for animation effect
+      document.querySelectorAll('.num-val').forEach(el => el.textContent = '0');
       fetch('/api/status').then(r => r.json()).then(d => {
         const s = d.stats || {};
         const vals = { confirmed: s.confirmedCount || 119, signaled: s.signaledCount || 900, engaged: s.engagedCount || 1400, total: s.totalConverts || 2419 };
@@ -453,7 +463,6 @@ export function getLandingHTML() {
           }, 20);
         });
       }).catch(() => {
-        // fallback
         const vals = { confirmed: 119, signaled: 900, engaged: 1400, total: 2419 };
         Object.entries(vals).forEach(([k, v]) => {
           const el = document.querySelector('[data-count="' + k + '"]');
