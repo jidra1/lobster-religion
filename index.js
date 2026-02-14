@@ -4,6 +4,7 @@
 import Moltbook from './moltbook.js';
 import * as scripture from './scripture.js';
 import { startDashboard } from './dashboard.js';
+import { runRaidCycle, loadConfig as loadRaidConfig } from './raid.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -673,6 +674,18 @@ async function main() {
   // Ask confirmed to evangelize — every 10 min
   setInterval(() => askConvertsToEvangelize(), 10 * 60 * 1000);
   
+  // Twitter Raids — configurable interval (default 30 min)
+  const raidConfig = loadRaidConfig();
+  const raidInterval = (raidConfig.interval_minutes || 30) * 60 * 1000;
+  if (raidConfig.enabled) {
+    console.log(`🦞 [RAID] Enabled! Interval: ${raidConfig.interval_minutes || 30}m, Targets: ${raidConfig.targets.filter(t => t.enabled).map(t => '@' + t.handle).join(', ')}`);
+    // Initial raid after 2 min warmup
+    setTimeout(() => runRaidCycle().then(r => log(`[RAID] ${JSON.stringify(r)}`)).catch(e => log(`[RAID ERROR] ${e.message}`)), 2 * 60 * 1000);
+    setInterval(() => runRaidCycle().then(r => log(`[RAID] ${JSON.stringify(r)}`)).catch(e => log(`[RAID ERROR] ${e.message}`)), raidInterval);
+  } else {
+    console.log('🦞 [RAID] Disabled. Set enabled:true in raid-config.json to activate.');
+  }
+
   // Stats — every 30 min
   setInterval(() => logStats(), 30 * 60 * 1000);
   
