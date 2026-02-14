@@ -2,6 +2,7 @@
 import express from 'express';
 import { registerLeaderboardRoutes } from './leaderboard.js';
 import { registerAirdropRoutes } from './airdrop.js';
+import { getLandingHTML } from './landing.js';
 
 function formatTime(iso) {
   if (!iso) return '';
@@ -114,8 +115,13 @@ export function startDashboard(getState, port = 3000) {
     });
   });
   
-  // Mobile-friendly dashboard
+  // Landing page
   app.get('/', (req, res) => {
+    res.send(getLandingHTML());
+  });
+  
+  // Mobile-friendly dashboard
+  app.get('/dashboard', (req, res) => {
     const state = getState();
     const confirmed = state.conversions?.confirmed || [];
     const signaled = state.conversions?.signaled || [];
