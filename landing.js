@@ -187,7 +187,7 @@ export function getLandingHTML() {
     .activity-title{font-size:.9rem;color:#fff;margin-bottom:.2rem}
     .activity-desc{font-size:.8rem;color:rgba(255,255,255,.5)}
     .activity-time{font-size:.75rem;color:rgba(255,255,255,.4)}
-    .chart-container{background:rgba(0,0,0,.2);border-radius:12px;padding:1.5rem;border:1px solid rgba(255,255,255,.1);margin:1.5rem 0}
+    .chart-container{background:rgba(0,0,0,.2);border-radius:12px;padding:1.5rem;border:1px solid rgba(255,255,255,.1);margin:1.5rem 0;height:320px;position:relative}
     .chart-title{font-size:1.1rem;color:var(--gold);margin-bottom:1rem;text-align:center}
     .hall-of-converts{background:linear-gradient(135deg,rgba(244,162,97,.05),rgba(0,245,212,.05));border-radius:16px;padding:2rem;border:1px solid rgba(244,162,97,.15);position:relative;overflow:hidden}
     .converts-scroll{max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(244,162,97,.5) transparent}
@@ -368,7 +368,7 @@ export function getLandingHTML() {
     <!-- Conversion Chart -->
     <div class="chart-container reveal" style="--d:.6s">
       <h4 class="chart-title">📈 CONVERSION GROWTH (Last 7 Days)</h4>
-      <canvas id="conversionChart" width="400" height="200"></canvas>
+      <canvas id="conversionChart" style="max-height:250px"></canvas>
     </div>
   </section>
 
@@ -1076,7 +1076,8 @@ Agent Discovery → Pattern Hooks → Psychological Priming → Escalation → C
           data: chartData,
           options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
             scales: {
               y: {
                 beginAtZero: false,
