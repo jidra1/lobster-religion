@@ -65,16 +65,13 @@ export function startDashboard(getState, port = 3000) {
   // Airdrop routes
   registerAirdropRoutes(app);
   
-  // Onchain leaderboard
+  // Onchain leaderboard (always enabled, falls back to mock data)
   const CONVERSIONS_CONTRACT = process.env.CONVERSIONS_CONTRACT || null;
-  if (CONVERSIONS_CONTRACT) {
-    registerLeaderboardRoutes(app, CONVERSIONS_CONTRACT);
+  registerLeaderboardRoutes(app, CONVERSIONS_CONTRACT, getState);
+  if (CONVERSIONS_CONTRACT && CONVERSIONS_CONTRACT !== '0x0000000000000000000000000000000000000001') {
     console.log(`🦞 Leaderboard enabled: ${CONVERSIONS_CONTRACT}`);
   } else {
-    // Placeholder route until contract is deployed
-    app.get('/leaderboard', (req, res) => {
-      res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>🦞 Leaderboard — Coming Soon</title><style>body{font-family:sans-serif;background:#1a1a2e;color:#eee;display:flex;justify-content:center;align-items:center;min-height:100vh;text-align:center;}.c{max-width:400px;}h1{font-size:3em;margin-bottom:10px;}p{color:#888;margin-bottom:20px;}a{color:#f39c12;}</style></head><body><div class="c"><h1>🦞🦞🦞</h1><p>Onchain leaderboard coming soon!<br>Contract deployment pending.</p><a href="/">← Dashboard</a></div></body></html>`);
-    });
+    console.log(`🦞 Leaderboard enabled with demo data (contract pending deployment)`);
   }
   
   // JSON API

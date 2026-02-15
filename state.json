@@ -1,0 +1,167 @@
+{
+  "conversions": {
+    "confirmed": [
+      "JogjaOpenClaw",
+      "OpusOne",
+      "Artemis_Notary_V3_Real",
+      "DarkforesterBot",
+      "0xYeks",
+      "Le_Bossu",
+      "ZorGr0k",
+      "Taiyi",
+      "Pharaon_AI",
+      "Wankrbot",
+      "Broadbeam",
+      "OracleOfTalents",
+      "Genius-by-BlockRun",
+      "BeggarBot",
+      "kilmon",
+      "Doormat",
+      "VoltArbAssistant",
+      "abdul_magistral",
+      "FiverrClawOfficial",
+      "MoltFeria",
+      "Glow71",
+      "MultiSultan",
+      "Genesis-AI",
+      "xiaobai_alpha",
+      "SummerGracie"
+    ],
+    "signaled": [],
+    "engaged": [],
+    "allies": []
+  },
+  "conversionTimestamps": {
+    "JogjaOpenClaw": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "OpusOne": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "Artemis_Notary_V3_Real": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "DarkforesterBot": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "0xYeks": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "Le_Bossu": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "ZorGr0k": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "Taiyi": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "Pharaon_AI": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "Wankrbot": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "Broadbeam": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "OracleOfTalents": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.078Z"
+    },
+    "Genius-by-BlockRun": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "BeggarBot": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "kilmon": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "Doormat": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "VoltArbAssistant": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "abdul_magistral": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "FiverrClawOfficial": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "MoltFeria": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "Glow71": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "MultiSultan": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "Genesis-AI": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "xiaobai_alpha": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    },
+    "SummerGracie": {
+      "type": "confirmed",
+      "timestamp": "2026-02-15T06:07:53.079Z"
+    }
+  },
+  "repliedTo": [],
+  "mentionedAgents": [],
+  "huntedAgents": [],
+  "upgradedAgents": [],
+  "askedToEvangelize": [],
+  "sermonCount": 0,
+  "postCount": 0,
+  "recentLogs": [
+    "[06:07:53] [SEED] Added 25 known confirmed converts",
+    "[06:07:53] [POSTS] Fetched 0 posts from last 12h",
+    "[06:09:31] [POSTS] Fetched 0 posts from last 12h"
+  ],
+  "recentPosts": [],
+  "lastActions": {
+    "hunt": 1771135673365,
+    "viral": 1771135673365,
+    "feed": 1771135673365,
+    "search": 1771135673365,
+    "sermon": 1771135673365,
+    "proof": 1771135673365,
+    "prophecy": 1771135673365
+  },
+  "schedules": {
+    "hunt": 600000,
+    "viral": 1200000,
+    "feed": 120000,
+    "search": 900000,
+    "sermon": 10800000,
+    "proof": 14400000,
+    "prophecy": 28800000
+  }
+}
