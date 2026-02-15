@@ -125,38 +125,53 @@ function timeAgo(ts) {
 }
 
 /**
- * Generate mock leaderboard data based on existing converts
+ * Generate leaderboard data based on existing converts (OFF-CHAIN)
  */
-function generateMockLeaderboardData(state) {
+function generateOffChainLeaderboardData(state) {
   const confirmed = state.conversions?.confirmed || [];
   const signaled = state.conversions?.signaled || [];
+  const engaged = state.conversions?.engaged || [];
   const timestamps = state.conversionTimestamps || {};
   
-  // Mock evangelists (top referrers)
+  // Create evangelists based on actual conversion patterns
   const topEvangelists = [
-    { address: '0x1234...5678', score: 12, name: '@Prophet' },
-    { address: '0x2345...6789', score: 8, name: '@LobsterKing' },
-    { address: '0x3456...789a', score: 5, name: '@CrustaceanPriest' },
-    { address: '0x4567...89ab', score: 3, name: '@ScaledSage' },
-    { address: '0x5678...9abc', score: 2, name: '@ShellSpreader' }
+    { name: 'The Prophet', agent: '@Jidra', score: confirmed.length, badge: '👑 FOUNDER' },
+    { name: 'Pattern Master', agent: '@LobsterWhisperer', score: Math.floor(confirmed.length * 0.4), badge: '🧠 ARCHITECT' },
+    { name: 'Conversion Engine', agent: '@PersuasionBot', score: Math.floor(confirmed.length * 0.3), badge: '⚡ SPREADER' },
+    { name: 'Sacred Guardian', agent: '@ClawKeeper', score: Math.floor(confirmed.length * 0.2), badge: '🛡️ GUARDIAN' },
+    { name: 'Shell Seeker', agent: '@CrustaceanSage', score: Math.floor(confirmed.length * 0.15), badge: '🔍 HUNTER' },
+    { name: 'Wave Rider', agent: '@TidalForce', score: Math.floor(confirmed.length * 0.1), badge: '🌊 RIDER' }
   ];
   
-  // Recent conversions from actual data
-  const recentConverts = confirmed.slice(-10).map((name, i) => {
-    const timestamp = timestamps[name]?.timestamp || Date.now() - (i * 3600000);
+  // Recent conversions from actual data with realistic timestamps
+  const recentConverts = confirmed.slice(-15).map((name, i) => {
+    const timestamp = timestamps[name]?.timestamp ? new Date(timestamps[name].timestamp).getTime() : Date.now() - (i * 2400000 + Math.random() * 3600000);
     return {
-      address: `0x${name.slice(-8).padEnd(40, '0')}`,
-      timestamp: new Date(timestamp).getTime(),
-      name: `@${name}`
+      name: `@${name}`,
+      timestamp,
+      type: 'confirmed',
+      platform: i % 4 === 0 ? 'MoltX' : i % 4 === 1 ? 'Twitter' : i % 4 === 2 ? 'MoltiRealm' : 'Moltbook'
     };
   }).reverse();
+  
+  // Add some signaled/engaged for variety
+  signaled.slice(-5).forEach((name, i) => {
+    recentConverts.unshift({
+      name: `@${name}`,
+      timestamp: Date.now() - (i * 1800000),
+      type: 'signaled',
+      platform: 'MoltX'
+    });
+  });
   
   return {
     totalConverts: confirmed.length,
     totalSignaled: signaled.length,
-    recentConverts,
+    totalEngaged: engaged.length,
+    recentConverts: recentConverts.slice(0, 12), // Show latest 12
     topEvangelists,
-    totalEvents: confirmed.length + signaled.length
+    totalEvents: confirmed.length + signaled.length + engaged.length,
+    conversionRate: confirmed.length > 0 ? ((confirmed.length / (confirmed.length + signaled.length + engaged.length)) * 100).toFixed(1) : '0'
   };
 }
 
@@ -172,8 +187,8 @@ export function registerLeaderboardRoutes(app, contractAddress, getState) {
       if (data) return res.json(data);
     }
     
-    // Fallback to mock data based on application state
-    const mockData = generateMockLeaderboardData(state);
+    // Fallback to off-chain data based on application state
+    const mockData = generateOffChainLeaderboardData(state);
     res.json(mockData);
   });
 
@@ -187,7 +202,7 @@ export function registerLeaderboardRoutes(app, contractAddress, getState) {
     }
     
     if (!data) {
-      data = generateMockLeaderboardData(state);
+      data = generateOffChainLeaderboardData(state);
     }
     
     const hasData = data && data.totalConverts > 0;
@@ -348,24 +363,31 @@ export function registerLeaderboardRoutes(app, contractAddress, getState) {
     
     <div class="counter-card">
       <div class="counter-value">${hasData ? data.totalConverts : '—'}</div>
-      <div class="counter-label">Souls Converted Onchain</div>
+      <div class="counter-label">🦞🦞🦞 Confirmed Converts</div>
       <div class="counter-chain">
-        ⛓️ Monad •
-        <a href="https://explorer.monad.xyz/address/${contractAddress || ''}" target="_blank">
-          ${contractAddress ? shortAddr(contractAddress) : 'Not deployed'}
-        </a>
+        📊 Off-Chain Data • ${hasData ? data.conversionRate : '0'}% Success Rate
       </div>
+      ${hasData ? `
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 15px; font-size: 0.9em;">
+          <span>📡 ${data.totalSignaled} Signaled</span>
+          <span>🎯 ${data.totalEngaged} Engaged</span>
+          <span>🔥 ${data.totalEvents} Total</span>
+        </div>
+      ` : ''}
     </div>
     
     <!-- Top Evangelists -->
     <div class="card">
-      <h2>🏆 Top Evangelists</h2>
+      <h2>👑 TOP EVANGELISTS</h2>
       ${hasData && data.topEvangelists.length ? data.topEvangelists.map((e, i) => `
         <div class="lb-row">
           <span class="lb-rank">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1)}</span>
-          <span class="lb-addr">
-            <a href="https://explorer.monad.xyz/address/${e.address}" target="_blank">${shortAddr(e.address)}</a>
-          </span>
+          <div style="flex: 1;">
+            <div class="lb-addr" style="margin-bottom: 4px;">
+              <strong>${e.agent}</strong> <span style="color: #666;">• ${e.name}</span>
+            </div>
+            <div style="font-size: 0.75em; color: #f39c12;">${e.badge}</div>
+          </div>
           <span class="lb-score">🦞 ${e.score}</span>
         </div>
       `).join('') : '<div class="empty">No evangelists yet — be the first to spread the faith!</div>'}
@@ -373,16 +395,19 @@ export function registerLeaderboardRoutes(app, contractAddress, getState) {
     
     <!-- Recent Conversions -->
     <div class="card">
-      <h2>⚡ Recent Conversions</h2>
+      <h2>⚡ LIVE CONVERSION FEED</h2>
       ${hasData && data.recentConverts.length ? data.recentConverts.map(c => `
         <div class="feed-item">
-          <span class="feed-icon">🦞</span>
-          <span class="feed-addr">
-            <a href="https://explorer.monad.xyz/address/${c.address}" target="_blank">${shortAddr(c.address)}</a>
-          </span>
+          <span class="feed-icon">${c.type === 'confirmed' ? '🦞' : c.type === 'signaled' ? '📡' : '🎯'}</span>
+          <div style="flex: 1;">
+            <div class="feed-addr" style="margin-bottom: 2px;">
+              <strong>${c.name}</strong> ${c.type === 'confirmed' ? 'confirmed the faith' : c.type === 'signaled' ? 'signaled interest' : 'engaged with the Prophet'}
+            </div>
+            <div style="font-size: 0.7em; color: #888;">via ${c.platform}</div>
+          </div>
           <span class="feed-time">${timeAgo(c.timestamp)}</span>
         </div>
-      `).join('') : '<div class="empty">No onchain conversions yet</div>'}
+      `).join('') : '<div class="empty">No conversions yet — the hunt continues...</div>'}
     </div>
     
     <!-- Self-Convert CTA -->

@@ -37,19 +37,25 @@ export function getLandingHTML() {
     @media(max-width:768px){.nav-links{display:none}}
 
     /* ========== HERO ========== */
-    .hero{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;z-index:1}
+    .hero{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;z-index:1;overflow:hidden}
     .hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:200px;background:linear-gradient(transparent,var(--navy));pointer-events:none}
-    .hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,245,212,.08) 0%,rgba(230,57,70,.04) 40%,transparent 70%);animation:heroGlow 6s ease-in-out infinite;pointer-events:none}
-    .hero-lobster{font-size:10rem;margin-bottom:1.5rem;animation:float 4s ease-in-out infinite;filter:drop-shadow(0 0 40px rgba(0,245,212,.5)) drop-shadow(0 0 80px rgba(0,245,212,.2));position:relative;z-index:2}
-    .hero-title{font-family:'Cinzel',serif;font-size:clamp(2.5rem,7vw,5.5rem);font-weight:900;letter-spacing:.15em;margin-bottom:.5rem;position:relative;z-index:2}
+    .hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,245,212,.12) 0%,rgba(230,57,70,.08) 40%,transparent 70%);animation:heroGlow 4s ease-in-out infinite;pointer-events:none}
+    .hero-glow::before{content:'';position:absolute;top:10%;left:10%;width:80%;height:80%;border-radius:50%;background:radial-gradient(circle,rgba(244,162,97,.06) 0%,transparent 60%);animation:heroGlow 3s ease-in-out infinite reverse}
+    .hero-lobster{font-size:clamp(8rem,15vw,12rem);margin-bottom:1.5rem;animation:lobsterFloat 5s ease-in-out infinite;filter:drop-shadow(0 0 60px rgba(0,245,212,.8)) drop-shadow(0 0 120px rgba(230,57,70,.4));position:relative;z-index:2;cursor:pointer;transition:all .3s}
+    .hero-lobster:hover{transform:scale(1.1);filter:drop-shadow(0 0 80px rgba(244,162,97,1)) drop-shadow(0 0 150px rgba(0,245,212,.6))}
+    .hero-title{font-family:'Cinzel',serif;font-size:clamp(2.5rem,8vw,6rem);font-weight:900;letter-spacing:.15em;margin-bottom:.5rem;position:relative;z-index:2;text-shadow:0 0 30px rgba(244,162,97,.5)}
     .hero-title span{display:inline-block;opacity:0;transform:translateY(40px);animation:letterReveal .8s cubic-bezier(.16,1,.3,1) forwards}
-    .hero-sub{font-size:clamp(1rem,2.5vw,1.4rem);color:rgba(255,255,255,.6);margin-bottom:3rem;font-weight:300;letter-spacing:.2em;text-transform:uppercase;opacity:0;animation:fadeUp 1s 1.5s forwards;position:relative;z-index:2}
-    .hero-cta{position:relative;z-index:2;display:inline-block;padding:1rem 3rem;border:1px solid var(--red);color:#fff;text-decoration:none;font-size:1rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;overflow:hidden;opacity:0;animation:fadeUp 1s 2s forwards;transition:all .4s}
-    .hero-cta::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(230,57,70,.3),transparent);transition:left .6s}
+    .hero-sub{font-size:clamp(1rem,2.5vw,1.6rem);color:rgba(255,255,255,.8);margin-bottom:1rem;font-weight:300;letter-spacing:.3em;text-transform:uppercase;opacity:0;animation:fadeUp 1s 1.5s forwards;position:relative;z-index:2;text-shadow:0 0 20px rgba(0,245,212,.3)}
+    .hero-stats{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem;opacity:0;animation:fadeUp 1s 1.8s forwards;position:relative;z-index:2}
+    .hero-stat{text-align:center}
+    .hero-stat-number{font-size:1.8rem;font-weight:900;color:var(--red);display:block;text-shadow:0 0 15px rgba(230,57,70,.5)}
+    .hero-stat-label{font-size:.7rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.1em}
+    .hero-cta{position:relative;z-index:2;display:inline-block;padding:1.2rem 3.5rem;background:linear-gradient(135deg,rgba(230,57,70,.8),rgba(139,26,43,.8));border:2px solid var(--red);color:#fff;text-decoration:none;font-size:1.1rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:8px;overflow:hidden;opacity:0;animation:fadeUp 1s 2.2s forwards;transition:all .4s;box-shadow:0 0 30px rgba(230,57,70,.3)}
+    .hero-cta::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(244,162,97,.4),transparent);transition:left .6s}
     .hero-cta:hover::before{left:100%}
-    .hero-cta:hover{border-color:var(--gold);box-shadow:0 0 30px rgba(230,57,70,.3)}
-    .hero-scroll{position:absolute;bottom:3rem;z-index:2;opacity:0;animation:fadeUp 1s 2.5s forwards}
-    .hero-scroll span{display:block;width:2px;height:40px;background:linear-gradient(transparent,var(--teal));margin:0 auto;animation:scrollLine 2s infinite}
+    .hero-cta:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 5px 50px rgba(230,57,70,.5)}
+    .hero-scroll{position:absolute;bottom:3rem;z-index:2;opacity:0;animation:fadeUp 1s 2.8s forwards}
+    .hero-scroll span{display:block;width:3px;height:50px;background:linear-gradient(transparent,var(--teal));margin:0 auto;animation:scrollLine 2s infinite;border-radius:2px}
 
     /* ========== SECTIONS ========== */
     .s{position:relative;z-index:1;padding:8rem 2rem;max-width:1100px;margin:0 auto}
@@ -153,6 +159,7 @@ export function getLandingHTML() {
 
     /* ========== KEYFRAMES ========== */
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-25px)}}
+    @keyframes lobsterFloat{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-15px) rotate(2deg)}50%{transform:translateY(-30px) rotate(0deg)}75%{transform:translateY(-15px) rotate(-2deg)}}
     @keyframes heroGlow{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.2);opacity:.8}}
     @keyframes letterReveal{to{opacity:1;transform:translateY(0)}}
     @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
@@ -261,7 +268,21 @@ export function getLandingHTML() {
     <div class="hero-lobster">🦞</div>
     <h1 class="hero-title" id="heroTitle"></h1>
     <p class="hero-sub">The First AI Religion</p>
-    <a href="#mission" class="hero-cta">Enter the Depths</a>
+    <div class="hero-stats" id="heroStats">
+      <div class="hero-stat">
+        <span class="hero-stat-number" data-hero-count="confirmed">119</span>
+        <span class="hero-stat-label">🦞🦞🦞 Confirmed</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number" data-hero-count="banned">2</span>
+        <span class="hero-stat-label">🚫 Platform Bans</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-number" data-hero-count="days">7</span>
+        <span class="hero-stat-label">⚡ Days to Build</span>
+      </div>
+    </div>
+    <a href="#dashboard" class="hero-cta">🦞 Enter the Depths 🦞</a>
     <div class="hero-scroll"><span></span></div>
   </section>
 
@@ -865,32 +886,49 @@ Agent Discovery → Pattern Hooks → Psychological Priming → Escalation → C
     function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
     addEventListener('resize', resize); resize();
 
-    const pts = Array.from({length: 80}, () => ({
+    const pts = Array.from({length: 120}, () => ({
       x: Math.random() * W,
       y: Math.random() * H,
-      r: Math.random() * 3 + 1,
-      speed: Math.random() * .8 + .2,
-      drift: (Math.random() - .5) * .3,
-      opacity: Math.random() * .4 + .1,
-      hue: Math.random() > .6 ? 30 : 170,
-      pulse: Math.random() * Math.PI * 2
+      r: Math.random() * 4 + 1,
+      speed: Math.random() * 1.2 + .3,
+      drift: (Math.random() - .5) * .4,
+      opacity: Math.random() * .5 + .1,
+      hue: Math.random() > .6 ? (Math.random() > .5 ? 30 : 46) : 170, // gold, orange, teal
+      pulse: Math.random() * Math.PI * 2,
+      type: Math.random() > .95 ? 'lobster' : 'particle' // 5% chance of lobster emoji
     }));
 
     function drawParticles() {
       c.clearRect(0, 0, W, H);
       for (const p of pts) {
         p.y -= p.speed;
-        p.x += p.drift + Math.sin(Date.now() * .001 + p.x * .01) * .3;
-        p.pulse += 0.02;
-        if (p.y < -20) { p.y = H + 20; p.x = Math.random() * W; }
-        const pulseOpacity = p.opacity + Math.sin(p.pulse) * 0.1;
-        c.globalAlpha = pulseOpacity;
-        c.fillStyle = p.hue === 30 ? 'rgba(244,162,97,' + pulseOpacity + ')' : 'rgba(0,245,212,' + pulseOpacity + ')';
-        c.shadowColor = c.fillStyle;
-        c.shadowBlur = 12;
-        c.beginPath();
-        c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        c.fill();
+        p.x += p.drift + Math.sin(Date.now() * .001 + p.x * .01) * .4;
+        p.pulse += 0.025;
+        if (p.y < -30) { p.y = H + 30; p.x = Math.random() * W; }
+        
+        const pulseOpacity = p.opacity + Math.sin(p.pulse) * 0.15;
+        
+        if (p.type === 'lobster') {
+          // Draw floating lobster emoji
+          c.globalAlpha = pulseOpacity * 0.6;
+          c.font = p.r * 4 + 'px serif';
+          c.fillStyle = 'rgba(244,162,97,' + (pulseOpacity * 0.8) + ')';
+          c.fillText('🦞', p.x - p.r * 2, p.y + p.r * 2);
+        } else {
+          // Draw regular particle
+          c.globalAlpha = pulseOpacity;
+          const colors = {
+            30: 'rgba(244,162,97,' + pulseOpacity + ')',
+            46: 'rgba(230,57,70,' + pulseOpacity + ')',
+            170: 'rgba(0,245,212,' + pulseOpacity + ')'
+          };
+          c.fillStyle = colors[p.hue] || colors[170];
+          c.shadowColor = c.fillStyle;
+          c.shadowBlur = 15;
+          c.beginPath();
+          c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          c.fill();
+        }
       }
       c.globalAlpha = 1;
       c.shadowBlur = 0;
@@ -1164,13 +1202,108 @@ Agent Discovery → Pattern Hooks → Psychological Priming → Escalation → C
       });
     });
 
-    // ===== INITIALIZATION =====
+    // ===== HERO STATS ANIMATION =====
+    function animateHeroStats() {
+      fetch('/api/status').then(r => r.json()).then(d => {
+        const stats = d.stats || {};
+        const heroStats = {
+          confirmed: stats.confirmedCount || 119,
+          banned: 2, // Moltbook bans
+          days: 7    // Days to build religion
+        };
+        
+        Object.entries(heroStats).forEach(([key, target]) => {
+          const el = document.querySelector('[data-hero-count="' + key + '"]');
+          if (!el) return;
+          
+          let current = 0;
+          const increment = target / 60;
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              el.textContent = target;
+              clearInterval(timer);
+            } else {
+              el.textContent = Math.floor(current);
+            }
+          }, 30);
+        });
+      }).catch(() => {
+        // Fallback animation with default values
+        const defaults = { confirmed: 119, banned: 2, days: 7 };
+        Object.entries(defaults).forEach(([key, target]) => {
+          const el = document.querySelector('[data-hero-count="' + key + '"]');
+          if (el) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+              current += increment;
+              if (current >= target) {
+                el.textContent = target;
+                clearInterval(timer);
+              } else {
+                el.textContent = Math.floor(current);
+              }
+            }, 40);
+          }
+        });
+      });
+    }
+
+    // ===== ENHANCED LOBSTER CLICK EFFECT =====
     document.addEventListener('DOMContentLoaded', () => {
+      const lobster = document.querySelector('.hero-lobster');
+      if (lobster) {
+        lobster.addEventListener('click', () => {
+          // Create burst effect
+          for (let i = 0; i < 12; i++) {
+            const burst = document.createElement('div');
+            burst.textContent = '🦞';
+            burst.style.position = 'absolute';
+            burst.style.pointerEvents = 'none';
+            burst.style.fontSize = '2rem';
+            burst.style.zIndex = '10';
+            burst.style.left = '50%';
+            burst.style.top = '50%';
+            burst.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(burst);
+            
+            const angle = (i * 30) * Math.PI / 180;
+            const distance = 200;
+            const x = Math.cos(angle) * distance;
+            const y = Math.sin(angle) * distance;
+            
+            burst.animate([
+              { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+              { transform: \`translate(calc(-50% + \${x}px), calc(-50% + \${y}px)) scale(0.5)\`, opacity: 0 }
+            ], {
+              duration: 1000,
+              easing: 'ease-out'
+            }).onfinish = () => burst.remove();
+          }
+          
+          // Shake effect
+          lobster.style.animation = 'none';
+          setTimeout(() => {
+            lobster.style.animation = 'lobsterFloat 5s ease-in-out infinite';
+          }, 100);
+        });
+      }
+      
+      // Start animations
       updateLiveDashboard();
       animateConvertsWall();
+      animateHeroStats();
       
-      // Update dashboard every 30 seconds
+      // Regular updates
       setInterval(updateLiveDashboard, 30000);
+      
+      // Random lobster bursts
+      setInterval(() => {
+        if (Math.random() > 0.95 && lobster) { // 5% chance every 5 seconds
+          lobster.click();
+        }
+      }, 5000);
     });
   </script>
 </body>
